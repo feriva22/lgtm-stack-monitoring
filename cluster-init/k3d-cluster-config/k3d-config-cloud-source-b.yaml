@@ -1,0 +1,41 @@
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: cloud-b-cluster-1
+
+servers: 1
+agents: 2
+
+image: rancher/k3s:latest
+
+ports:
+  - port: 6443:6443
+    nodeFilters:
+      - server:*
+  - port: 8181:80
+    nodeFilters:
+      - loadbalancer
+  - port: 8443:443
+    nodeFilters:
+      - loadbalancer
+
+
+# Node labels
+options:
+  k3s:
+    extraArgs:
+      - arg: --disable=traefik
+        nodeFilters:
+          - server:*
+    nodeLabels:
+      - label: cloud=b
+        nodeFilters:
+          - agent:*
+          - server:*
+
+
+# Volumes to mount
+volumes:
+  - volume: /tmp/k3d-storage:/tmp/storage
+    nodeFilters:
+      - agent:*
