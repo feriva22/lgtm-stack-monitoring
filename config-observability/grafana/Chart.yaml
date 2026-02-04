@@ -1,0 +1,11 @@
+apiVersion: v2
+name: grafana-lgtm-stack
+description: A wrapper chart for Grafana
+type: application
+version: 1.0.0
+appVersion: "10.0.0"
+
+dependencies:
+  - name: grafana
+    version: "12.3.2" # Or your preferred version
+    repository: "https://grafana.github.io/helm-charts"
