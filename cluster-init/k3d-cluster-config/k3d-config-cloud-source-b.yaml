@@ -6,6 +6,16 @@ metadata:
 servers: 1
 agents: 2
 
+registries:
+  config: | # tell K3s to use this registry when pulling from DockerHub
+    mirrors:
+      "docker.io":
+        endpoint:
+          - http://k3d-docker-io:5000
+      "quay.io":
+        endpoint:
+          - http://k3d-quay-io:5000
+
 image: rancher/k3s:latest
 
 ports:

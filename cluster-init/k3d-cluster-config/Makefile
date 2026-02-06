@@ -10,6 +10,7 @@ help:
 	@echo "K3D Cluster Management"
 	@echo "====================="
 	@echo "Available targets:"
+	@echo "  make create-private-repository - Create a private Docker registry"
 	@echo "  make create-all         - Create all clusters (cloud-a and cloud-b)"
 	@echo "  make create-cloud-a     - Create cloud-a cluster only"
 	@echo "  make create-cloud-b     - Create cloud-b cluster only"
@@ -22,6 +23,17 @@ help:
 	@echo "  make delete-all         - Delete all clusters"
 	@echo "  make delete-cloud-a     - Delete cloud-a cluster only"
 	@echo "  make delete-cloud-b     - Delete cloud-b cluster only"
+
+create-private-repository:
+	@echo "Creating private Docker registry..."
+	k3d registry create docker-io -p 5000 --proxy-remote-url https://registry-1.docker.io -v ~/.local/share/docker-io-registry:/var/lib/registry || true
+	k3d registry create quay-io -p 5001 --proxy-remote-url https://quay.io -v ~/.local/share/quay-io-registry:/var/lib/registry || true
+	docker network connect k3d-$(CLOUD_A_CLUSTER) k3d-docker-io || true
+	docker network connect k3d-$(CLOUD_A_CLUSTER) k3d-quay-io || true
+	docker network connect k3d-$(CLOUD_B_CLUSTER) k3d-docker-io || true
+	docker network connect k3d-$(CLOUD_B_CLUSTER) k3d-quay-io || true
+
+	@echo "✓ Private Docker registry created"
 
 create-all: create-cloud-a create-cloud-b verify-clusters
 	@echo "✓ All clusters created successfully!"

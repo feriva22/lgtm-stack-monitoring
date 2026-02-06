@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"ConfigMap","metadata":{"labels":{"app.kubernetes.io/name":"argocd-cmd-params-cm","app.kubernetes.io/part-of":"argocd"},"name":"argocd-cmd-params-cm","namespace":"default"}}
+  creationTimestamp: "2026-02-04T07:37:36Z"
+  labels:
+    app.kubernetes.io/name: argocd-cmd-params-cm
+    app.kubernetes.io/part-of: argocd
+  name: argocd-cmd-params-cm
+  namespace: default
+  resourceVersion: "19130"
+  uid: 582d4da2-16de-4280-b6e0-ee702faf0a43
+data:
+  # This tells the server to listen on HTTP (port 8080) instead of HTTPS
+  server.insecure: "true"

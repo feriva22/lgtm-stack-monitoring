@@ -1,2 +1,12 @@
 grafana:
   namespaceOverride: "observability"
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - grafana.feri-devops-machine.deploy-at.my.id
+    annotations: 
+      ingress.kubernetes.io/ssl-redirect: 'false'
+      nginx.ingress.kubernetes.io/backend-protocol: HTTP
+      nginx.ingress.kubernetes.io/force-ssl-redirect: 'false'
+
