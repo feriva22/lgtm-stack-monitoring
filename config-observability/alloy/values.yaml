@@ -43,11 +43,11 @@ alloy:
         prometheus.scrape "kubernetes_all" {
           targets = concat(
             discovery.kubernetes.pods.targets,
-            discovery.kubernetes.nodes.targets,
-            discovery.kubernetes.services.targets,
-            discovery.kubernetes.endpoints.targets,
-            discovery.kubernetes.endpointslices.targets,
-            discovery.kubernetes.ingresses.targets,
+            // discovery.kubernetes.nodes.targets,
+            // discovery.kubernetes.services.targets,
+            // discovery.kubernetes.endpoints.targets,
+            // discovery.kubernetes.endpointslices.targets,
+            // discovery.kubernetes.ingresses.targets,
           )
           
           forward_to = [prometheus.remote_write.mimir_receiver.receiver]
