@@ -1,57 +1,57 @@
 alloy:
-  alloy:
-    clustering:
-      enabled: false
   controller:
     # -- Type of controller to use for deploying Grafana Alloy in the cluster.
     # Must be one of 'daemonset', 'deployment', or 'statefulset'.
     type: 'daemonset'
-  configMap:
-    content: |-
-      // Write your Alloy config here:
-      logging {
-        level  = "info"
-        format = "logfmt"
-      }
-
-      discovery.kubernetes "pods" {
-        role = "pod"
-      }
-
-      discovery.kubernetes "nodes" {
-        role = "node"
-      }
-
-      discovery.kubernetes "services" {
-        role = "service"
-      }
-
-      discovery.kubernetes "endpoints" {
-        role = "endpoints"
-      }
-
-      discovery.kubernetes "endpointslices" {
-        role = "endpointslice"
-      }
-
-      discovery.kubernetes "ingresses" {
-        role = "ingress"
-      }
-
-      // Remote write to Mimir
-      prometheus.remote_write "mimir_receiver" {
-        endpoint {
-          url = "http://mimir-gateway.observability.svc.cluster.local/api/v1/push"
-          send_native_histograms = true
+  alloy:
+    clustering:
+      enabled: false
+    configMap:
+      content: |-
+        // Write your Alloy config here:
+        logging {
+          level  = "info"
+          format = "logfmt"
         }
-      }
 
-      // Scrape metrics from discovered targets
-      prometheus.scrape "kubernetes_pods" {
-        targets    = discovery.kubernetes.pods.output
-        forward_to = [prometheus.remote_write.mimir_receiver.receiver]
-        scrape_interval = "30s"
-        scrape_timeout  = "10s"
-      }
+        discovery.kubernetes "pods" {
+          role = "pod"
+        }
+
+        discovery.kubernetes "nodes" {
+          role = "node"
+        }
+
+        discovery.kubernetes "services" {
+          role = "service"
+        }
+
+        discovery.kubernetes "endpoints" {
+          role = "endpoints"
+        }
+
+        discovery.kubernetes "endpointslices" {
+          role = "endpointslice"
+        }
+
+        discovery.kubernetes "ingresses" {
+          role = "ingress"
+        }
+
+        // Remote write to Mimir
+        prometheus.remote_write "mimir_receiver" {
+          endpoint {
+            url = "http://mimir-gateway.observability.svc.cluster.local/api/v1/push"
+            send_native_histograms = true
+          }
+        }
+
+        // Scrape metrics from discovered targets
+        prometheus.scrape "kubernetes_pods" {
+          targets    = discovery.kubernetes.pods.output
+          forward_to = [prometheus.remote_write.mimir_receiver.receiver]
+          scrape_interval = "30s"
+          scrape_timeout  = "10s"
+        }
 
 
