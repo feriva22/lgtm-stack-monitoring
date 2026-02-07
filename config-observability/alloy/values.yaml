@@ -14,44 +14,34 @@ alloy:
           format = "logfmt"
         }
 
-        discovery.kubernetes "pods" {
-          role = "pod"
-        }
-
-        discovery.kubernetes "nodes" {
-          role = "node"
-        }
-
-        discovery.kubernetes "services" {
+        // Scrape Node Exporter
+        discovery.kubernetes "node_exporter" {
           role = "service"
+          selectors {
+            label = "app.kubernetes.io/name=prometheus-node-exporter"
+          }
         }
 
-        discovery.kubernetes "endpoints" {
-          role = "endpoints"
-        }
-
-        discovery.kubernetes "endpointslices" {
-          role = "endpointslice"
-        }
-
-        discovery.kubernetes "ingresses" {
-          role = "ingress"
-        }
-
-        // 3. Aggregate all discovery targets
-        // We use concat() to join all the .targets lists into one
-        prometheus.scrape "kubernetes_all" {
-          targets = concat(
-            discovery.kubernetes.pods.targets,
-            // discovery.kubernetes.nodes.targets,
-            // discovery.kubernetes.services.targets,
-            // discovery.kubernetes.endpoints.targets,
-            // discovery.kubernetes.endpointslices.targets,
-            // discovery.kubernetes.ingresses.targets,
-          )
-          
+        prometheus.scrape "node_exporter" {
+          targets    = discovery.kubernetes.node_exporter.targets
           forward_to = [prometheus.remote_write.mimir_receiver.receiver]
-          
+
+          scrape_interval = "30s"
+          scrape_timeout  = "10s"
+        }
+
+        // Scrape Kube-State-Metrics
+        discovery.kubernetes "ksm" {
+          role = "service"
+          selectors {
+            label = "app.kubernetes.io/name=kube-state-metrics"
+          }
+        }
+
+        prometheus.scrape "kube_state_metrics" {
+          targets    = discovery.kubernetes.ksm.targets
+          forward_to = [prometheus.remote_write.mimir_receiver.receiver]
+
           scrape_interval = "30s"
           scrape_timeout  = "10s"
         }
