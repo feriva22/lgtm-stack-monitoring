@@ -13,5 +13,5 @@ dependencies:
     version: "4.51.1" # Or your preferred version
     repository: "https://prometheus-community.github.io/helm-charts"
   - name: kube-state-metrics
-    version: "1.0.0" # Or your preferred version
+    version: "7.1.0" # Or your preferred version
     repository: "https://prometheus-community.github.io/helm-charts"
