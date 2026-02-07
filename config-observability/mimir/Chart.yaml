@@ -8,4 +8,4 @@ appVersion: "10.0.0"
 dependencies:
   - name: mimir-distributed
     version: "5.8.0" # Or your preferred version
-    repository: "https://grafana-community.github.io/helm-charts"
+    repository: "https://grafana.github.io/helm-charts"
