@@ -14,6 +14,11 @@ alloy:
           format = "logfmt"
         }
 
+        // 1. Find the nodes
+        discovery.kubernetes "nodes" {
+          role = "node"
+        }
+
         // Scrape Node Exporter
         discovery.kubernetes "node_exporter" {
           role = "service"
