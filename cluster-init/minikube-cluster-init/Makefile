@@ -54,13 +54,23 @@ start:
 		--cpus=$(CPUS) \
 		--memory=$(MEMORY) \
 		--driver=docker \
-		--addons=ingress,metrics-server \
 		--force \
 		--docker-env HTTP_PROXY=http://feri-devops-machine.taild55be.ts.net:3128 \
 		--docker-env HTTPS_PROXY=http://feri-devops-machine.taild55be.ts.net:3128 \
 		--docker-env NO_PROXY="localhost,127.0.0.1,10.96.0.0/12,100.90.113.0/24" \
 		--insecure-registry="100.90.113.0/24" \
 		--wait=all
+	@echo "Enable addons..."
+	sudo minikube addons enable ingress -p $(PROFILE)
+	sudo minikube addons enable metrics-server -p $(PROFILE)
+	@ echo "Disable default storageclass..."
+	sudo minikube addons disable storage-provisioner -p $(PROFILE)
+	sudo minikube addons disable default-storageclass -p $(PROFILE)
+	@ echo "Enable volume snapshot and csi-hostpath-driver addons to support multi-node ..."
+	sudo minikube addons enable volumesnapshots -p $(PROFILE)
+	sudo minikube addons enable csi-hostpath-driver -p $(PROFILE)
+	@ echo "Set the storageclass as default..."
+	sudo minikube -p $(PROFILE) -- patch storageclass csi-hostpath-sc -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 
 	@echo "Cluster is ready. 2 nodes running with registry mirrors configured."
 	@$(MAKE) setup-user-kubeconfig
