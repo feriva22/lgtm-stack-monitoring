@@ -22,22 +22,43 @@ alloy:
         // 2. Point to the Kubelet's cAdvisor endpoint
         prometheus.scrape "cadvisor" {
           targets = discovery.kubernetes.nodes.targets
-          
+
           // This tells Alloy to look at the /metrics/cadvisor path
           metrics_path = "/metrics/cadvisor"
           scheme       = "https"
-        
+
           // Use the standard K8s credentials provided to the Alloy pod
           authorization {
             type = "Bearer"
             credentials_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
           }
-        
+
           tls_config {
             ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
             insecure_skip_verify = true // Required for Minikube's self-signed certs
           }
-        
+
+          forward_to = [prometheus.remote_write.mimir_receiver.receiver]
+        }
+
+        // 3. Point to the Kubelet's main metrics endpoint
+        prometheus.scrape "kubelet" {
+          targets = discovery.kubernetes.nodes.targets
+          
+          // NOTE: We do NOT use /metrics/cadvisor here
+          metrics_path = "/metrics" 
+          scheme       = "https"
+
+          authorization {
+            type = "Bearer"
+            credentials_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+          }
+
+          tls_config {
+            ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+            insecure_skip_verify = true 
+          }
+
           forward_to = [prometheus.remote_write.mimir_receiver.receiver]
         }
 
