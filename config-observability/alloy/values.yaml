@@ -38,20 +38,29 @@ alloy:
           role = "ingress"
         }
 
-        // Remote write to Mimir
+        // 3. Aggregate all discovery targets
+        // We use concat() to join all the .targets lists into one
+        prometheus.scrape "kubernetes_all" {
+          targets = concat(
+            discovery.kubernetes.pods.targets,
+            discovery.kubernetes.nodes.targets,
+            discovery.kubernetes.services.targets,
+            discovery.kubernetes.endpoints.targets,
+            discovery.kubernetes.endpointslices.targets,
+            discovery.kubernetes.ingresses.targets,
+          )
+          
+          forward_to = [prometheus.remote_write.mimir_receiver.receiver]
+          
+          scrape_interval = "30s"
+          scrape_timeout  = "10s"
+        }
+
+        // 4. Remote write to Mimir
         prometheus.remote_write "mimir_receiver" {
           endpoint {
             url = "http://mimir-gateway.observability.svc.cluster.local/api/v1/push"
             send_native_histograms = true
           }
         }
-
-        // Scrape metrics from discovered targets
-        prometheus.scrape "kubernetes_pods" {
-          targets    = discovery.kubernetes.pods.output
-          forward_to = [prometheus.remote_write.mimir_receiver.receiver]
-          scrape_interval = "30s"
-          scrape_timeout  = "10s"
-        }
-
 
