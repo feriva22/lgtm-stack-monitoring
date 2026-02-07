@@ -24,147 +24,152 @@
 # MinIO is no longer enabled, and you are encouraged to use your cloud providers
 # object storage service such as S3 or GCS.
 
-alertmanager:
-  persistentVolume:
+mimir-distributed:
+  alertmanager:
+    persistentVolume:
+      enabled: true
+    replicas: 2
+    resources:
+      limits:
+        memory: 1.4Gi
+      requests:
+        cpu: 1
+        memory: 1Gi
+    statefulSet:
+      enabled: true
+
+  compactor:
+    persistentVolume:
+      size: 20Gi
+    resources:
+      limits:
+        memory: 2.1Gi
+      requests:
+        cpu: 1
+        memory: 1.5Gi
+
+  distributor:
+    replicas: 2
+    resources:
+      limits:
+        memory: 5.7Gi
+      requests:
+        cpu: 2
+        memory: 4Gi
+
+  ingester:
+    persistentVolume:
+      size: 50Gi
+    replicas: 3
+    resources:
+      limits:
+        memory: 12Gi
+      requests:
+        cpu: 3.5
+        memory: 8Gi
+    topologySpreadConstraints: {}
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/component
+                  operator: In
+                  values:
+                    - ingester
+            topologyKey: "kubernetes.io/hostname"
+
+    zoneAwareReplication:
+      topologyKey: "kubernetes.io/hostname"
+
+  admin-cache:
     enabled: true
-  replicas: 2
-  resources:
-    limits:
-      memory: 1.4Gi
-    requests:
-      cpu: 1
-      memory: 1Gi
-  statefulSet:
+    replicas: 3
+
+  chunks-cache:
     enabled: true
+    replicas: 3
 
-compactor:
-  persistentVolume:
-    size: 20Gi
-  resources:
-    limits:
-      memory: 2.1Gi
-    requests:
-      cpu: 1
-      memory: 1.5Gi
+  index-cache:
+    enabled: true
+    replicas: 3
 
-distributor:
-  replicas: 2
-  resources:
-    limits:
-      memory: 5.7Gi
-    requests:
-      cpu: 2
-      memory: 4Gi
+  metadata-cache:
+    enabled: true
+    replicas: 3
 
-ingester:
-  persistentVolume:
-    size: 50Gi
-  replicas: 3
-  resources:
-    limits:
-      memory: 12Gi
-    requests:
-      cpu: 3.5
-      memory: 8Gi
-  topologySpreadConstraints: {}
-  affinity:
-    podAntiAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchExpressions:
-              - key: app.kubernetes.io/component
-                operator: In
-                values:
-                  - ingester
-          topologyKey: "kubernetes.io/hostname"
+  results-cache:
+    enabled: true
+    replicas: 3
 
-  zoneAwareReplication:
-    topologyKey: "kubernetes.io/hostname"
+  minio:
+    enabled: false
 
-chunks-cache:
-  enabled: true
-  replicas: 3
+  overrides_exporter:
+    replicas: 1
+    resources:
+      limits:
+        memory: 128Mi
+      requests:
+        cpu: 100m
+        memory: 128Mi
 
-index-cache:
-  enabled: true
-  replicas: 3
+  querier:
+    replicas: 1
+    resources:
+      limits:
+        memory: 5.6Gi
+      requests:
+        cpu: 2
+        memory: 4Gi
 
-metadata-cache:
-  enabled: true
-  replicas: 3
+  query_frontend:
+    replicas: 1
+    resources:
+      limits:
+        memory: 2.8Gi
+      requests:
+        cpu: 2
+        memory: 2Gi
 
-results-cache:
-  enabled: true
-  replicas: 3
+  ruler:
+    replicas: 1
+    resources:
+      limits:
+        memory: 2.8Gi
+      requests:
+        cpu: 1
+        memory: 2Gi
 
-minio:
-  enabled: false
+  store_gateway:
+    persistentVolume:
+      size: 10Gi
+    replicas: 3
+    resources:
+      limits:
+        memory: 2.1Gi
+      requests:
+        cpu: 1
+        memory: 1.5Gi
+    topologySpreadConstraints: {}
+    affinity:
+      podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+                - key: app.kubernetes.io/component
+                  operator: In
+                  values:
+                    - store-gateway
+            topologyKey: "kubernetes.io/hostname"
+    zoneAwareReplication:
+      topologyKey: "kubernetes.io/hostname"
 
-overrides_exporter:
-  replicas: 1
-  resources:
-    limits:
-      memory: 128Mi
-    requests:
-      cpu: 100m
-      memory: 128Mi
-
-querier:
-  replicas: 1
-  resources:
-    limits:
-      memory: 5.6Gi
-    requests:
-      cpu: 2
-      memory: 4Gi
-
-query_frontend:
-  replicas: 1
-  resources:
-    limits:
-      memory: 2.8Gi
-    requests:
-      cpu: 2
-      memory: 2Gi
-
-ruler:
-  replicas: 1
-  resources:
-    limits:
-      memory: 2.8Gi
-    requests:
-      cpu: 1
-      memory: 2Gi
-
-store_gateway:
-  persistentVolume:
-    size: 10Gi
-  replicas: 3
-  resources:
-    limits:
-      memory: 2.1Gi
-    requests:
-      cpu: 1
-      memory: 1.5Gi
-  topologySpreadConstraints: {}
-  affinity:
-    podAntiAffinity:
-      requiredDuringSchedulingIgnoredDuringExecution:
-        - labelSelector:
-            matchExpressions:
-              - key: app.kubernetes.io/component
-                operator: In
-                values:
-                  - store-gateway
-          topologyKey: "kubernetes.io/hostname"
-  zoneAwareReplication:
-    topologyKey: "kubernetes.io/hostname"
-
-gateway:
-  replicas: 1
-  resources:
-    limits:
-      memory: 731Mi
-    requests:
-      cpu: 1
-      memory: 512Mi
+  gateway:
+    replicas: 1
+    resources:
+      limits:
+        memory: 731Mi
+      requests:
+        cpu: 1
+        memory: 512Mi
