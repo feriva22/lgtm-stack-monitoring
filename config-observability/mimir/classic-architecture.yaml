@@ -18,3 +18,17 @@ mimir-distributed:
         remote_timeout: null
       ingester:
         push_grpc_method_enabled: null
+  
+  minio:
+    enabled: true
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hosts:
+        - host: minio.feri-devops-machine.deploy-at.my.id
+          paths:
+            - path: /
+              pathType: Prefix
+              backend:
+                service:
+                  name: minio
