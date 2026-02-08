@@ -14,6 +14,12 @@ alloy:
           level  = "info"
           format = "logfmt"
         }
+        
+        // Add ruler integration
+        mimir.rules.kubernetes "local" {
+          address = "http://mimir-ruler.observability.svc.cluster.local:8080"
+          tenant_id = "CompanyA-Cluster1-Jakarta"
+        }
 
         // 1. Discover and scrape all ServiceMonitors (Node Exporter, KSM, etc.)
         prometheus.operator.servicemonitors "kube_stack" {
