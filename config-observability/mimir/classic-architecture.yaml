@@ -22,15 +22,10 @@ mimir-distributed:
   minio:
     enabled: true
     ingress:
-      enabled: true
+      enabled: false 
       ingressClassName: nginx
-      annotations:
-        # Standard MinIO NGINX annotations
-        nginx.ingress.kubernetes.io/proxy-body-size: "0"
-        nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
-        nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
       hosts:
-        - host: "minio.feri-devops-machine.deploy-at.my.id"
+        - host: minio.feri-devops-machine.deploy-at.my.id
           paths:
             - path: /
               pathType: Prefix
