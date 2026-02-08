@@ -1,0 +1,11 @@
+apiVersion: v2
+name: k8s-agent-monitoring-stack
+description: A wrapper chart for k8s-agent-monitoring using node-exporter and kube-state-metrics and alloy for Prometheus setup
+type: application
+version: 1.0.0
+appVersion: "10.0.0"
+
+dependencies:
+  - name: kube-prometheus-stack
+    version: "81.5.0" # Or your preferred version
+    repository: "https://prometheus-community.github.io/helm-charts"

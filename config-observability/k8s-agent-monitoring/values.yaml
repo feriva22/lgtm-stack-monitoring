@@ -1,0 +1,27 @@
+kube-prometheus-stack:
+  # Disable the local database and UI
+  prometheus:
+    enabled: false
+  alertmanager:
+    enabled: false
+  grafana:
+    enabled: false
+
+  # Enable CRDs installation
+  crds:
+    enabled: true
+
+  # Keep the "Brain" (Operator) and the "Body" (Exporters)
+  prometheusOperator:
+    enabled: true
+  nodeExporter:
+    enabled: true
+  kubeStateMetrics:
+    enabled: true
+
+  # Keep the Default ServiceMonitors so Alloy can find them
+  # This is where the labeling logic lives!
+  defaultRules:
+    create: true  # This creates the PrometheusRules (alerts)
+  kubernetesServiceMonitors:
+    enabled: true # This creates the ServiceMonitors for Kubelet, etc.
