@@ -8,18 +8,21 @@ alloy:
       enabled: false
     configMap:
       content: |-
-        // Write your Alloy config here:
         logging {
           level  = "info"
           format = "logfmt"
         }
 
-        // 1. Scrape All metrics from Kubernetes components
+        // ==========================================================
+        // 1. DISCOVERY SECTION
+        // ==========================================================
+
+        // Discover Nodes for Kubelet & cAdvisor
         discovery.kubernetes "nodes" {
           role = "node"
         }
 
-        // Scrape Node Exporter
+        // Discover Node Exporter Service
         discovery.kubernetes "node_exporter" {
           role = "service"
           selectors {
@@ -28,7 +31,7 @@ alloy:
           }
         }
 
-        // Scrape Kube-State-Metrics
+        // Discover Kube-State-Metrics Service
         discovery.kubernetes "ksm" {
           role = "service"
           selectors {
@@ -37,43 +40,70 @@ alloy:
           }
         }
 
-        //--------------------------------------------------------------/
+        // ==========================================================
+        // 2. RELABELING SECTION (Dashboard Compatibility Fixes)
+        // ==========================================================
 
-        // 2. Define Relabeling component to fix "job" labels for dashboards
-        prometheus.relabel "fix_legacy_labels" {
+        // Fix for cAdvisor: Requires job="kubelet" AND metrics_path="/metrics/cadvisor"
+        prometheus.relabel "cadvisor_fix" {
           forward_to = [prometheus.remote_write.mimir_receiver.receiver]
 
-          // Rule for cAdvisor: Dashboards usually expect job="kubelet" or "kubernetes-cadvisor"
-          // Check your dashboard variable, if it uses job="kubelet", use that below.
           rule {
-            source_labels = ["__address__"]
-            target_label  = "job"
-            replacement   = "kubelet" // Standard for cadvisor metrics in many stacks
+            target_label = "job"
+            replacement  = "kubelet"
           }
 
-          // Rule for Node Exporter: Dashboards expect job="node-exporter"
           rule {
-            source_labels = ["__address__"]
-            regex         = ".*node-exporter.*"
-            target_label  = "job"
-            replacement   = "node-exporter"
+            target_label = "metrics_path"
+            replacement  = "/metrics/cadvisor"
           }
-
-          // Rule for Kube-State-Metrics: Dashboards expect job="kube-state-metrics"
+          
+          // Optional: Add cluster label if your dashboard uses $cluster variable
           rule {
-            source_labels = ["__address__"]
-            regex         = ".*kube-state-metrics.*"
-            target_label  = "job"
-            replacement   = "kube-state-metrics"
+            target_label = "cluster"
+            replacement  = "cloud-a-cluster-1" // Change this value as needed
           }
         }
 
-        // 3. Update your scrape components to forward to the relabeler
+        // Fix for Node Exporter: Requires job="node-exporter"
+        prometheus.relabel "node_exporter_fix" {
+          forward_to = [prometheus.remote_write.mimir_receiver.receiver]
+
+          rule {
+            target_label = "job"
+            replacement  = "node-exporter"
+          }
+        }
+
+        // Fix for KSM: Requires job="kube-state-metrics"
+        prometheus.relabel "ksm_fix" {
+          forward_to = [prometheus.remote_write.mimir_receiver.receiver]
+
+          rule {
+            target_label = "job"
+            replacement  = "kube-state-metrics"
+          }
+        }
+
+        // Fix for Kubelet (Summary/Main): Requires job="kubelet"
+        prometheus.relabel "kubelet_fix" {
+          forward_to = [prometheus.remote_write.mimir_receiver.receiver]
+
+          rule {
+            target_label = "job"
+            replacement  = "kubelet"
+          }
+        }
+
+        // ==========================================================
+        // 3. SCRAPE SECTION
+        // ==========================================================
+
         prometheus.scrape "cadvisor" {
-          targets    = discovery.kubernetes.nodes.targets
+          targets      = discovery.kubernetes.nodes.targets
           metrics_path = "/metrics/cadvisor"
-          
-          // Use the standard K8s credentials provided to the Alloy pod
+          scheme       = "https"
+
           authorization {
             type = "Bearer"
             credentials_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
@@ -81,36 +111,47 @@ alloy:
 
           tls_config {
             ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-            insecure_skip_verify = true // Required for Minikube's self-signed certs
+            insecure_skip_verify = true 
           }
 
-          forward_to = [prometheus.relabel.fix_legacy_labels.receiver] // CHANGE THIS
+          forward_to = [prometheus.relabel.cadvisor_fix.receiver]
+        }
 
-          scrape_interval = "30s"
-          scrape_timeout  = "10s"
+        prometheus.scrape "kubelet" {
+          targets      = discovery.kubernetes.nodes.targets
+          metrics_path = "/metrics" 
+          scheme       = "https"
+
+          authorization {
+            type = "Bearer"
+            credentials_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+          }
+
+          tls_config {
+            ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+            insecure_skip_verify = true 
+          }
+
+          forward_to = [prometheus.relabel.kubelet_fix.receiver]
         }
 
         prometheus.scrape "node_exporter" {
           targets    = discovery.kubernetes.node_exporter.targets
-          forward_to = [prometheus.relabel.fix_legacy_labels.receiver] // CHANGE THIS
-
-          scrape_interval = "30s"
-          scrape_timeout  = "10s"
+          forward_to = [prometheus.relabel.node_exporter_fix.receiver]
         }
 
         prometheus.scrape "kube_state_metrics" {
           targets    = discovery.kubernetes.ksm.targets
-          forward_to = [prometheus.relabel.fix_legacy_labels.receiver] // CHANGE THIS
-
-          scrape_interval = "30s"
-          scrape_timeout  = "10s"
+          forward_to = [prometheus.relabel.ksm_fix.receiver]
         }
 
-        // 4. Remote write to Mimir
+        // ==========================================================
+        // 4. REMOTE WRITE SECTION
+        // ==========================================================
+
         prometheus.remote_write "mimir_receiver" {
           endpoint {
             url = "http://mimir-gateway.observability.svc.cluster.local/api/v1/push"
             send_native_histograms = true
           }
         }
-
