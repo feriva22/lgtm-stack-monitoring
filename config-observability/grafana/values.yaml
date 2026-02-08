@@ -23,5 +23,5 @@ grafana:
         - name: Mimir
           type: prometheus
           access: proxy
-          url: http://mimir-gateway.observability.svc.cluster.local
+          url: http://mimir-gateway.observability.svc.cluster.local/prometheus
           isDefault: true
