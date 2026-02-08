@@ -20,10 +20,15 @@ mimir-distributed:
         push_grpc_method_enabled: null
   
   minio:
-    enabled: false
+    enabled: true
     ingress:
       enabled: true
       ingressClassName: nginx
+      annotations:
+        # Standard MinIO NGINX annotations
+        nginx.ingress.kubernetes.io/proxy-body-size: "0"
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
       hosts:
         - host: minio.feri-devops-machine.deploy-at.my.id
           paths:

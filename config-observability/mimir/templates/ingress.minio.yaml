@@ -1,30 +1,17 @@
-{{- if .Values.minio.ingress.enabled }}
+{{- if .Values.minio.enabled -}}
+{{- if .Values.minio.ingress.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "mimir-lgtm-stack.fullname" . }}-minio
-  namespace: {{ .Release.Namespace }}
+  name: {{ .Release.Name }}-minio
   labels:
-    {{- include "mimir-lgtm-stack.labels" . | nindent 4 }}
-    app: minio
+    app.kubernetes.io/name: minio
   {{- with .Values.minio.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if .Values.minio.ingress.ingressClassName }}
   ingressClassName: {{ .Values.minio.ingress.ingressClassName }}
-  {{- end }}
-  {{- if .Values.minio.ingress.tls }}
-  tls:
-    {{- range .Values.minio.ingress.tls }}
-    - hosts:
-        {{- range .hosts }}
-        - {{ . | quote }}
-        {{- end }}
-      secretName: {{ .secretName }}
-    {{- end }}
-  {{- end }}
   rules:
     {{- range .Values.minio.ingress.hosts }}
     - host: {{ .host | quote }}
@@ -32,12 +19,14 @@ spec:
         paths:
           {{- range .paths }}
           - path: {{ .path }}
-            pathType: {{ .pathType | default "Prefix" }}
+            pathType: {{ .pathType }}
             backend:
               service:
-                name: {{ include "mimir-lgtm-stack.fullname" . }}-minio
+                # The service name for minio usually follows this pattern
+                name: {{ $.Release.Name }}-minio
                 port:
-                  number: {{ .Values.minio.service.port | default 9000 }}
+                  number: 9000
           {{- end }}
     {{- end }}
+{{- end }}
 {{- end }}
