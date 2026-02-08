@@ -14,52 +14,9 @@ alloy:
           format = "logfmt"
         }
 
-        // 1. Find the nodes
+        // 1. Scrape All metrics from Kubernetes components
         discovery.kubernetes "nodes" {
           role = "node"
-        }
-
-        // 2. Point to the Kubelet's cAdvisor endpoint
-        prometheus.scrape "cadvisor" {
-          targets = discovery.kubernetes.nodes.targets
-
-          // This tells Alloy to look at the /metrics/cadvisor path
-          metrics_path = "/metrics/cadvisor"
-          scheme       = "https"
-
-          // Use the standard K8s credentials provided to the Alloy pod
-          authorization {
-            type = "Bearer"
-            credentials_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-          }
-
-          tls_config {
-            ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-            insecure_skip_verify = true // Required for Minikube's self-signed certs
-          }
-
-          forward_to = [prometheus.remote_write.mimir_receiver.receiver]
-        }
-
-        // 3. Point to the Kubelet's main metrics endpoint
-        prometheus.scrape "kubelet" {
-          targets = discovery.kubernetes.nodes.targets
-          
-          // NOTE: We do NOT use /metrics/cadvisor here
-          metrics_path = "/metrics" 
-          scheme       = "https"
-
-          authorization {
-            type = "Bearer"
-            credentials_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
-          }
-
-          tls_config {
-            ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
-            insecure_skip_verify = true 
-          }
-
-          forward_to = [prometheus.remote_write.mimir_receiver.receiver]
         }
 
         // Scrape Node Exporter
@@ -71,14 +28,6 @@ alloy:
           }
         }
 
-        prometheus.scrape "node_exporter" {
-          targets    = discovery.kubernetes.node_exporter.targets
-          forward_to = [prometheus.remote_write.mimir_receiver.receiver]
-
-          scrape_interval = "30s"
-          scrape_timeout  = "10s"
-        }
-
         // Scrape Kube-State-Metrics
         discovery.kubernetes "ksm" {
           role = "service"
@@ -88,9 +37,70 @@ alloy:
           }
         }
 
+        //--------------------------------------------------------------/
+
+        // 2. Define Relabeling component to fix "job" labels for dashboards
+        prometheus.relabel "fix_legacy_labels" {
+          forward_to = [prometheus.remote_write.mimir_receiver.receiver]
+
+          // Rule for cAdvisor: Dashboards usually expect job="kubelet" or "kubernetes-cadvisor"
+          // Check your dashboard variable, if it uses job="kubelet", use that below.
+          rule {
+            source_labels = ["__address__"]
+            target_label  = "job"
+            replacement   = "kubelet" // Standard for cadvisor metrics in many stacks
+          }
+
+          // Rule for Node Exporter: Dashboards expect job="node-exporter"
+          rule {
+            source_labels = ["__address__"]
+            regex         = ".*node-exporter.*"
+            target_label  = "job"
+            replacement   = "node-exporter"
+          }
+
+          // Rule for Kube-State-Metrics: Dashboards expect job="kube-state-metrics"
+          rule {
+            source_labels = ["__address__"]
+            regex         = ".*kube-state-metrics.*"
+            target_label  = "job"
+            replacement   = "kube-state-metrics"
+          }
+        }
+
+        // 3. Update your scrape components to forward to the relabeler
+        prometheus.scrape "cadvisor" {
+          targets    = discovery.kubernetes.nodes.targets
+          metrics_path = "/metrics/cadvisor"
+          
+          // Use the standard K8s credentials provided to the Alloy pod
+          authorization {
+            type = "Bearer"
+            credentials_file = "/var/run/secrets/kubernetes.io/serviceaccount/token"
+          }
+
+          tls_config {
+            ca_file = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+            insecure_skip_verify = true // Required for Minikube's self-signed certs
+          }
+
+          forward_to = [prometheus.relabel.fix_legacy_labels.receiver] // CHANGE THIS
+
+          scrape_interval = "30s"
+          scrape_timeout  = "10s"
+        }
+
+        prometheus.scrape "node_exporter" {
+          targets    = discovery.kubernetes.node_exporter.targets
+          forward_to = [prometheus.relabel.fix_legacy_labels.receiver] // CHANGE THIS
+
+          scrape_interval = "30s"
+          scrape_timeout  = "10s"
+        }
+
         prometheus.scrape "kube_state_metrics" {
           targets    = discovery.kubernetes.ksm.targets
-          forward_to = [prometheus.remote_write.mimir_receiver.receiver]
+          forward_to = [prometheus.relabel.fix_legacy_labels.receiver] // CHANGE THIS
 
           scrape_interval = "30s"
           scrape_timeout  = "10s"
