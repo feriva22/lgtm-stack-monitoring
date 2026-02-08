@@ -13,13 +13,39 @@ alloy:
           format = "logfmt"
         }
 
-        // ==========================================================
-        // 4. REMOTE WRITE SECTION
-        // ==========================================================
+        // 1. Discover and scrape all ServiceMonitors (Node Exporter, KSM, etc.)
+        prometheus.operator.servicemonitors "kube_stack" {
+          forward_to = [prometheus.remote_write.mimir.receiver]
+        }
 
-        prometheus.remote_write "mimir_receiver" {
+        // 2. Discover and scrape all PodMonitors (if you have any)
+        prometheus.operator.podmonitors "kube_stack" {
+          forward_to = [prometheus.remote_write.mimir.receiver]
+        }
+
+        // 3. Define the Remote Write destination (Mimir)
+        prometheus.remote_write "mimir" {
           endpoint {
+            // This points to the Mimir Gateway service
             url = "http://mimir-gateway.observability.svc.cluster.local/api/v1/push"
-            send_native_histograms = true
+
+            // If your Mimir has multi-tenancy enabled (default in some charts), 
+            // you MUST provide a Tenant ID header.
+            headers = {
+              "X-Scope-OrgID" = "CompanyA-Cluster1-Jakarta", 
+            }
+            
+            // If you set up Basic Auth for Mimir, add this:
+            /*
+            basic_auth {
+              username = "your-user"
+              password = "your-password"
+            }
+            */
+          }
+
+          // Optional: Global labels added to EVERY metric
+          external_labels = {
+            "cluster" = "cloud-a-cluster-1-jakarta",
           }
         }
