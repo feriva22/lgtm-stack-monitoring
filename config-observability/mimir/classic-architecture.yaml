@@ -21,7 +21,7 @@ mimir-distributed:
   
   minio:
     enabled: true
-    ingress:
+    consoleIngress:
       enabled: true
       ingressClassName: nginx
       path: /
