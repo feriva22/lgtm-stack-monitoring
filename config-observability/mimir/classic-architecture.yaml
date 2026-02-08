@@ -20,7 +20,7 @@ mimir-distributed:
         push_grpc_method_enabled: null
   
   minio:
-    enabled: true
+    enabled: false
     ingress:
       enabled: true
       ingressClassName: nginx
