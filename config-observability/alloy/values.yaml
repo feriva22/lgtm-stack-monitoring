@@ -57,6 +57,11 @@ alloy:
             target_label = "metrics_path"
             replacement  = "/metrics/cadvisor"
           }
+
+          rule {
+            target_label = "cluster"
+            replacement  = "cloud-a-cluster-1" // Change this value as needed
+          }
           
         }
 
@@ -67,6 +72,11 @@ alloy:
           rule {
             target_label = "job"
             replacement  = "node-exporter"
+          }
+
+          rule {
+            target_label = "cluster"
+            replacement  = "cloud-a-cluster-1" // Change this value as needed
           }
         }
 
@@ -93,6 +103,11 @@ alloy:
           rule {
             target_label = "job"
             replacement  = "kubelet"
+          }
+
+          rule {
+            target_label = "cluster"
+            replacement  = "cloud-a-cluster-1" // Change this value as needed
           }
         }
 
