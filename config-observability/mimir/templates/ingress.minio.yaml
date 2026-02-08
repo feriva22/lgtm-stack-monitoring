@@ -1,33 +1,30 @@
-{{- if (index .Values "mimir-distributed" "minio" "enabled") -}}
-{{- $minio := (index .Values "mimir-distributed" "minio") -}}
-{{- if $minio.ingress.enabled -}}
+{{- if .Values.minioCustomIngress.enabled -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ .Release.Name }}-minio-custom
   namespace: {{ .Release.Namespace }}
-  labels:
-    app.kubernetes.io/name: minio
-  {{- with $minio.ingress.annotations }}
   annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: "0"
+    {{- with .Values.minioCustomIngress.annotations }}
     {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- end }}
 spec:
-  ingressClassName: {{ $minio.ingress.ingressClassName | default "nginx" }}
+  ingressClassName: {{ .Values.minioCustomIngress.ingressClassName }}
   rules:
-    {{- range $minio.ingress.hosts }}
+    {{- range .Values.minioCustomIngress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
           {{- range .paths }}
           - path: {{ .path }}
-            pathType: {{ .pathType | default "Prefix" }}
+            pathType: {{ .pathType }}
             backend:
               service:
+                # We still point to the service created by mimir-distributed
                 name: {{ $.Release.Name }}-minio
                 port:
                   number: 9000
           {{- end }}
     {{- end }}
-{{- end }}
 {{- end }}
