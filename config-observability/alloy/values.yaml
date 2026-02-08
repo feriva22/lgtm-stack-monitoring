@@ -58,11 +58,6 @@ alloy:
             replacement  = "/metrics/cadvisor"
           }
           
-          // Optional: Add cluster label if your dashboard uses $cluster variable
-          rule {
-            target_label = "cluster"
-            replacement  = "cloud-a-cluster-1" // Change this value as needed
-          }
         }
 
         // Fix for Node Exporter: Requires job="node-exporter"
@@ -82,6 +77,12 @@ alloy:
           rule {
             target_label = "job"
             replacement  = "kube-state-metrics"
+          }
+
+          // Optional: Add cluster label if your dashboard uses $cluster variable
+          rule {
+            target_label = "cluster"
+            replacement  = "cloud-a-cluster-1" // Change this value as needed
           }
         }
 
