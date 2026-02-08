@@ -16,7 +16,7 @@ grafana:
     size: 10Gi
   adminUser: admin
   adminPassword: strongpassword
-  datasources: {}
+  datasources:
     datasources.yaml:
       apiVersion: 1
       datasources:
