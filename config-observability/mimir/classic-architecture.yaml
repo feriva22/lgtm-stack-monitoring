@@ -38,6 +38,9 @@ mimir-distributed:
         remote_timeout: null
       ingester:
         push_grpc_method_enabled: null
+    # Enable metadata cache to reduce load on the Mimir components to serve metadata requests into Object Storage (minimize cost and latency)
+    metadata-cache:
+      enabled: true
   
   minio:
     enabled: true
