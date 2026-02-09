@@ -89,6 +89,24 @@ start:
 	@echo "Cluster is ready. 2 nodes running with registry mirrors configured."
 	@$(MAKE) setup-user-kubeconfig
 
+setup-credential-for-argocd:
+	# 1. Create the ServiceAccount
+	sudo minikube -p $(PROFILE) kubectl -- create serviceaccount argocd-manager -n kube-system || true
+
+	# 2. Give it Cluster Admin rights (so ArgoCD can deploy anything)
+	sudo minikube -p $(PROFILE) kubectl -- create clusterrolebinding argocd-manager-role \
+	  --clusterrole=cluster-admin \
+	  --serviceaccount=kube-system:argocd-manager || true
+
+	@# 1. Create the Secret (This "fills" the .secrets[0].name field you are looking for)
+	@echo '{"apiVersion":"v1","kind":"Secret","metadata":{"name":"argocd-manager-token","namespace":"kube-system","annotations":{"kubernetes.io/service-account.name":"argocd-manager"}},"type":"kubernetes.io/service-account-token"}' | sudo minikube -p $(PROFILE) kubectl -- apply -f -
+
+	@# 2. Get the token directly by the Secret Name we just created
+	@echo "Fetching token..."
+	@TOKEN=$$(sudo minikube -p $(PROFILE) kubectl -- get secret argocd-manager-token -n kube-system -o jsonpath="{.data.token}" | base64 --decode); \
+	if [ -z "$$TOKEN" ]; then echo "Error: Token not found in secret"; exit 1; fi; \
+	echo "Token: $$TOKEN"
+
 start-all:
 	@echo "Starting all profiles: $(PROFILES)"
 	@for profile in $(PROFILES); do \
@@ -100,21 +118,9 @@ start-all:
 setup-user-kubeconfig:
 	@echo "Setting up kubeconfig for current user..."
 	@mkdir -p $(HOME)/.kube
-	@mkdir -p $(HOME)/.minikube/profiles/$(PROFILE)
-	@sudo cp /root/.kube/config $(HOME)/.kube/config.$(PROFILE)
-	@sudo cp /root/.minikube/ca.crt $(HOME)/.minikube/ca.crt
-	@sudo cp /root/.minikube/ca.key $(HOME)/.minikube/ca.key
-	@sudo cp /root/.minikube/profiles/$(PROFILE)/client.crt $(HOME)/.minikube/profiles/$(PROFILE)/client.crt
-	@sudo cp /root/.minikube/profiles/$(PROFILE)/client.key $(HOME)/.minikube/profiles/$(PROFILE)/client.key
-	@sudo chown -R $(USER):$(USER) $(HOME)/.kube/config.$(PROFILE) $(HOME)/.minikube
-	@sed -i 's|/root/.minikube|$(HOME)/.minikube|g' $(HOME)/.kube/config.$(PROFILE)
-	@chmod 600 $(HOME)/.kube/config.$(PROFILE)
-	@chmod 644 $(HOME)/.minikube/ca.crt
-	@chmod 600 $(HOME)/.minikube/ca.key
-	@chmod 644 $(HOME)/.minikube/profiles/$(PROFILE)/client.crt
-	@chmod 600 $(HOME)/.minikube/profiles/$(PROFILE)/client.key
+	@sudo minikube -p $(PROFILE) kubectl -- config view --flatten --minify > $(HOME)/.kube/config.$(PROFILE)
+	
 	@echo "Kubeconfig saved to: $(HOME)/.kube/config.$(PROFILE)"
-	@echo "Certificates copied to: $(HOME)/.minikube"
 	@echo "To use it, set: export KUBECONFIG=$(HOME)/.kube/config.$(PROFILE)"
 
 status:
