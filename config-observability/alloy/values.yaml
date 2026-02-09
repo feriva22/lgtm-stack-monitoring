@@ -88,6 +88,9 @@ alloy:
         prometheus.scrape "mimir_metrics" {
           targets    = discovery.relabel.mimir_targets.output
           forward_to = [prometheus.remote_write.mimir.receiver]
+
+          // Set the frequency here (e.g., 60s or 15s)
+          scrape_interval = "60s"
         }
 
         // 3. Define the Remote Write destination (Mimir)
