@@ -25,3 +25,9 @@ grafana:
           access: proxy
           url: http://mimir-gateway.observability.svc.cluster.local/prometheus
           isDefault: true
+          # --- Added Header Configuration Below ---
+          jsonData:
+            httpHeaderName1: "X-Scope-OrgID"
+          secureJsonData:
+            httpHeaderValue1: "CompanyA-Cluster1-Jakarta"
+
