@@ -18,11 +18,6 @@ mimir-distributed:
   # Global Config: Reduce replication to save 33% of resources
   mimir:
     structuredConfig:
-      blocks_storage:
-        bucket_store:
-          # IMPORTANT: Reduces RAM by only loading index headers on demand
-          index_header_lazy_loading_enabled: true
-          index_header_lazy_loading_idle_timeout: 20m
       limits:
         # Maximum number of rules per rule group per-tenant. 0 to disable.
         ruler_max_rules_per_rule_group: 0
