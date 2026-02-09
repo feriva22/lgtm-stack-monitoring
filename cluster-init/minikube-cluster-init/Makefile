@@ -60,17 +60,20 @@ start:
 		--docker-env NO_PROXY="localhost,127.0.0.1,10.96.0.0/12,100.90.113.0/24" \
 		--insecure-registry="100.90.113.0/24" \
 		--wait=all
-	@echo "Inject Proxy to containerd service on all nodes..."
-	@echo "Iterate over all nodes to set containerd proxy configuration..."
-	for node in $(shell sudo minikube -p $(PROFILE) node list); do \
-		echo "Configuring containerd proxy on node $$node..."; \
-		sudo minikube -p $(PROFILE) ssh --node=$$node -- sudo mkdir -p /lib/systemd/system/containerd.service.d; \
-		sudo minikube -p $(PROFILE) ssh --node=$$node -- sudo touch /lib/systemd/system/containerd.service.d/http-proxy.conf; \
-		sudo minikube -p $(PROFILE) ssh --node=$$node -- sudo bash -c 'echo -e "[Service]\nEnvironment=\"HTTP_PROXY=http://feri-devops-machine.taild55be.ts.net:3128\" \"HTTPS_PROXY=http://feri-devops-machine.taild55be.ts.net:3128\"" > /lib/systemd/system/containerd.service.d/http-proxy.conf'
 
-		sudo minikube -p $(PROFILE) ssh --node=$$node -- sudo systemctl daemon-reload
-		sudo minikube -p $(PROFILE) ssh --node=$$node -- sudo systemctl restart containerd
-	
+	@echo "Inject Proxy to containerd service on all nodes..."
+	@# Capture all nodes. We filter out empty lines or table headers just in case.
+	@nodes=$$(minikube -p $(PROFILE) node list | grep -v "Node" | awk '{print $$1}' | xargs); \
+	for node in $$nodes; do \
+		echo "Configuring containerd proxy on node $$node..."; \
+		minikube -p $(PROFILE) ssh --node=$$node " \
+			sudo mkdir -p /lib/systemd/system/containerd.service.d && \
+			printf '[Service]\nEnvironment=\"HTTP_PROXY=http://feri-devops-machine.taild55be.ts.net:3128\"\nEnvironment=\"HTTPS_PROXY=http://feri-devops-machine.taild55be.ts.net:3128\"\n' | sudo tee /lib/systemd/system/containerd.service.d/http-proxy.conf > /dev/null && \
+			sudo systemctl daemon-reload && \
+			sudo systemctl restart containerd"; \
+	done
+
+	@echo "Containerd proxy configuration applied."
 	@echo "Enable addons..."
 	sudo minikube addons enable ingress -p $(PROFILE)
 	sudo minikube addons enable metrics-server -p $(PROFILE)
