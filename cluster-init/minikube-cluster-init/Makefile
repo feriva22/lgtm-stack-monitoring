@@ -89,6 +89,24 @@ start:
 	@echo "Cluster is ready. 2 nodes running with registry mirrors configured."
 	@$(MAKE) setup-user-kubeconfig
 
+setup-credential-for-argocd:
+	# 1. Create the ServiceAccount
+	sudo minikube -p $(PROFILE) kubectl -- create serviceaccount argocd-manager -n kube-system || true
+
+	# 2. Give it Cluster Admin rights (so ArgoCD can deploy anything)
+	sudo minikube -p $(PROFILE) kubectl -- create clusterrolebinding argocd-manager-role \
+	  --clusterrole=cluster-admin \
+	  --serviceaccount=kube-system:argocd-manager || true
+
+	@# 1. Create the Secret (This "fills" the .secrets[0].name field you are looking for)
+	@echo '{"apiVersion":"v1","kind":"Secret","metadata":{"name":"argocd-manager-token","namespace":"kube-system","annotations":{"kubernetes.io/service-account.name":"argocd-manager"}},"type":"kubernetes.io/service-account-token"}' | sudo minikube -p $(PROFILE) kubectl -- apply -f -
+
+	@# 2. Get the token directly by the Secret Name we just created
+	@echo "Fetching token..."
+	@TOKEN=$$(sudo minikube -p $(PROFILE) kubectl -- get secret argocd-manager-token -n kube-system -o jsonpath="{.data.token}" | base64 --decode); \
+	if [ -z "$$TOKEN" ]; then echo "Error: Token not found in secret"; exit 1; fi; \
+	echo "Token: $$TOKEN"
+
 start-all:
 	@echo "Starting all profiles: $(PROFILES)"
 	@for profile in $(PROFILES); do \
