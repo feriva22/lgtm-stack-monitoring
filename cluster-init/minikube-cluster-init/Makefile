@@ -100,21 +100,9 @@ start-all:
 setup-user-kubeconfig:
 	@echo "Setting up kubeconfig for current user..."
 	@mkdir -p $(HOME)/.kube
-	@mkdir -p $(HOME)/.minikube/profiles/$(PROFILE)
-	@sudo cp /root/.kube/config $(HOME)/.kube/config.$(PROFILE)
-	@sudo cp /root/.minikube/ca.crt $(HOME)/.minikube/ca.crt
-	@sudo cp /root/.minikube/ca.key $(HOME)/.minikube/ca.key
-	@sudo cp /root/.minikube/profiles/$(PROFILE)/client.crt $(HOME)/.minikube/profiles/$(PROFILE)/client.crt
-	@sudo cp /root/.minikube/profiles/$(PROFILE)/client.key $(HOME)/.minikube/profiles/$(PROFILE)/client.key
-	@sudo chown -R $(USER):$(USER) $(HOME)/.kube/config.$(PROFILE) $(HOME)/.minikube
-	@sed -i 's|/root/.minikube|$(HOME)/.minikube|g' $(HOME)/.kube/config.$(PROFILE)
-	@chmod 600 $(HOME)/.kube/config.$(PROFILE)
-	@chmod 644 $(HOME)/.minikube/ca.crt
-	@chmod 600 $(HOME)/.minikube/ca.key
-	@chmod 644 $(HOME)/.minikube/profiles/$(PROFILE)/client.crt
-	@chmod 600 $(HOME)/.minikube/profiles/$(PROFILE)/client.key
+	@sudo minikube -p $(PROFILE) kubectl -- config view --flatten --minify > $(HOME)/.kube/config.$(PROFILE)
+	
 	@echo "Kubeconfig saved to: $(HOME)/.kube/config.$(PROFILE)"
-	@echo "Certificates copied to: $(HOME)/.minikube"
 	@echo "To use it, set: export KUBECONFIG=$(HOME)/.kube/config.$(PROFILE)"
 
 status:
