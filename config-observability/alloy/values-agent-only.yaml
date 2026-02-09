@@ -17,7 +17,7 @@ alloy:
         
         // Add ruler integration
         mimir.rules.kubernetes "local" {
-          address = "http://mimir-gateway.feri-devops-machine.deploy-at.my.id/prometheus"
+          address = "http://mimir-gateway.feri-devops-machine.deploy-at.my.id"
           tenant_id = "CompanyA-Cluster1-Jakarta"
         }
 
