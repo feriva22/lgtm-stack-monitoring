@@ -7,12 +7,12 @@ mimir-distributed:
     enabled: false
 
   # Enabled mimir ingress for center of the architecture
-    ingress:
-      enabled: true
-      ingressClassName: nginx
-      hosts:
-        - mimir.feri-devops-machine.deploy-at.my.id
-        
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - mimir.feri-devops-machine.deploy-at.my.id
+
   mimir:
     structuredConfig:
       limits:
