@@ -31,6 +31,30 @@ alloy:
           forward_to = [prometheus.remote_write.mimir.receiver]
         }
 
+        // 3. Discover mimir metrics endpoint for self-monitoring
+        // 1. Discover all services in the cluster
+        discovery.kubernetes "mimir_services" {
+          role = "service"
+        }
+
+        // 2. Filter for specific Mimir components (e.g., those with a specific label)
+        discovery.relabel "mimir_targets" {
+          targets = discovery.kubernetes.mimir_services.targets
+
+          // Keep only services with the label app=mimir or similar
+          rule {
+            source_labels = ["__meta_kubernetes_service_label_app"]
+            regex         = "mimir.*"
+            action        = "keep"
+          }
+
+          // Map the service name to a 'job' label for easier querying in Mimir
+          rule {
+            source_labels = ["__meta_kubernetes_service_name"]
+            target_label  = "job"
+          }
+        }
+
         // 3. Define the Remote Write destination (Mimir)
         prometheus.remote_write "mimir" {
           endpoint {
