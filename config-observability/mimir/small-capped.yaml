@@ -1,0 +1,99 @@
+mimir-distributed:
+  # Enabled mimir ingress for center of the architecture
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+      - mimir.feri-devops-machine.deploy-at.my.id
+
+  # enable minio for object storage
+  minio:
+    enabled: true
+    consoleIngress:
+      enabled: true
+      ingressClassName: nginx
+      path: /
+      hosts:
+        - minio.feri-devops-machine.deploy-at.my.id
+  # Global Config: Reduce replication to save 33% of resources
+  mimir:
+    structuredConfig:
+      common:
+        replication_factor: 2
+      blocks_storage:
+        bucket_store:
+          # IMPORTANT: Reduces RAM by only loading index headers on demand
+          index_header_lazy_loading_enabled: true
+          index_header_lazy_loading_idle_timeout: 20m
+      limits:
+        # Maximum number of rules per rule group per-tenant. 0 to disable.
+        ruler_max_rules_per_rule_group: 0
+        # Maximum number of rule groups per-tenant. 0 to disable.
+        ruler_max_rule_groups_per_tenant: 0      
+
+  alertmanager:
+    replicas: 1  # Minimalist (Single pod is enough for basic alerting)
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+
+  compactor:
+    persistentVolume:
+      size: 30Gi # Reduced from 50Gi
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi # Essential for 1-year retention processing
+
+  distributor:
+    replicas: 2
+    resources:
+      requests:
+        cpu: 200m
+        memory: 512Mi # Distributors are stateless and light
+
+  ingester:
+    replicas: 2  # Reduced from 3 (Matches RF=2)
+    persistentVolume:
+      size: 20Gi # Reduced (We flush to S3 every 2h anyway)
+    resources:
+      requests:
+        cpu: 500m
+        memory: 2Gi # Minimum safe RAM for 1M active series
+
+  store_gateway:
+    replicas: 2  # Matches RF=2
+    persistentVolume:
+      size: 10Gi
+    resources:
+      requests:
+        cpu: 200m
+        memory: 1Gi # Low RAM thanks to lazy loading
+
+  querier:
+    replicas: 2 # 2 for basic HA on queries
+    resources:
+      requests:
+        cpu: 500m
+        memory: 1Gi # Sufficient for 7-day query windows
+
+  query_frontend:
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+
+  # Disable all extra caches to save cost/complexity unless query speed is slow
+  chunks-cache: { enabled: false }
+  index-cache: { enabled: false }
+  metadata-cache: { enabled: false }
+  results-cache: { enabled: false }
+
+  gateway:
+    replicas: 1
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
