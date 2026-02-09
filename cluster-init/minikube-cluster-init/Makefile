@@ -28,7 +28,7 @@ help:
 
 registry-mirror:
 	@echo "Configuring registry mirror for Minikube profile $(PROFILE)..."
-	sudo docker run -d --name docker-proxy \
+	@sudo docker start docker-proxy 2>/dev/null || sudo docker run -d --name docker-proxy \
   		-p 3128:3128 \
   		-e ENABLE_MANIFEST_CACHE=true \
 		-e DISABLE_IPV6=true \
@@ -53,13 +53,20 @@ start:
 		--nodes=$(NODES) \
 		--cpus=$(CPUS) \
 		--memory=$(MEMORY) \
-		--driver=docker \
+		--container-runtime=containerd \
 		--force \
 		--docker-env HTTP_PROXY=http://feri-devops-machine.taild55be.ts.net:3128 \
 		--docker-env HTTPS_PROXY=http://feri-devops-machine.taild55be.ts.net:3128 \
 		--docker-env NO_PROXY="localhost,127.0.0.1,10.96.0.0/12,100.90.113.0/24" \
 		--insecure-registry="100.90.113.0/24" \
 		--wait=all
+	@echo "Inject Proxy to containerd service on all nodes..."
+	sudo minikube -p $(PROFILE) ssh -- sudo mkdir -p /lib/systemd/system/containerd.service.d
+	sudo minikube -p $(PROFILE) ssh -- sudo touch /lib/systemd/system/containerd.service.d/http-proxy.conf
+	sudo minikube -p $(PROFILE) ssh -- sudo bash -c 'echo -e "[Service]\nEnvironment=\"HTTP_PROXY=http://feri-devops-machine.taild55be.ts.net:3128\" \"HTTPS_PROXY=http://feri-devops-machine.taild55be.ts.net:3128\"" > /lib/systemd/system/containerd.service.d/http-proxy.conf'
+	sudo minikube -p $(PROFILE) ssh -- sudo systemctl daemon-reload
+	sudo minikube -p $(PROFILE) ssh -- sudo systemctl restart containerd
+	
 	@echo "Enable addons..."
 	sudo minikube addons enable ingress -p $(PROFILE)
 	sudo minikube addons enable metrics-server -p $(PROFILE)
@@ -70,7 +77,7 @@ start:
 	sudo minikube addons enable volumesnapshots -p $(PROFILE)
 	sudo minikube addons enable csi-hostpath-driver -p $(PROFILE)
 	@ echo "Set the storageclass as default..."
-	sudo minikube -p $(PROFILE) -- patch storageclass csi-hostpath-sc -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+	sudo minikube -p $(PROFILE) kubectl -- patch storageclass csi-hostpath-sc -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 
 	@echo "Cluster is ready. 2 nodes running with registry mirrors configured."
 	@$(MAKE) setup-user-kubeconfig
