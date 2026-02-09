@@ -17,7 +17,7 @@ alloy:
         
         // Add ruler integration
         mimir.rules.kubernetes "local" {
-          address = "http://mimir.feri-devops-machine.deploy-at.my.id/prometheus/config/v1/rules"
+          address = "http://mimir-gateway.feri-devops-machine.deploy-at.my.id/prometheus/config/v1/rules"
           tenant_id = "CompanyB-Cluster1-Jakarta"
         }
 
@@ -35,7 +35,7 @@ alloy:
         prometheus.remote_write "mimir" {
           endpoint {
             // This points to the Mimir Gateway service
-            url = "http://mimir.feri-devops-machine.deploy-at.my.id/api/v1/push"
+            url = "http://mimir-gateway.feri-devops-machine.deploy-at.my.id/api/v1/push"
 
             // If your Mimir has multi-tenancy enabled (default in some charts), 
             // you MUST provide a Tenant ID header.
