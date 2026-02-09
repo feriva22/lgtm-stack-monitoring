@@ -18,8 +18,6 @@ mimir-distributed:
   # Global Config: Reduce replication to save 33% of resources
   mimir:
     structuredConfig:
-      common:
-        replication_factor: 2
       blocks_storage:
         bucket_store:
           # IMPORTANT: Reduces RAM by only loading index headers on demand
