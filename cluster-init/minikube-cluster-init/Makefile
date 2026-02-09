@@ -61,11 +61,15 @@ start:
 		--insecure-registry="100.90.113.0/24" \
 		--wait=all
 	@echo "Inject Proxy to containerd service on all nodes..."
-	sudo minikube -p $(PROFILE) ssh -- sudo mkdir -p /lib/systemd/system/containerd.service.d
-	sudo minikube -p $(PROFILE) ssh -- sudo touch /lib/systemd/system/containerd.service.d/http-proxy.conf
-	sudo minikube -p $(PROFILE) ssh -- sudo bash -c 'echo -e "[Service]\nEnvironment=\"HTTP_PROXY=http://feri-devops-machine.taild55be.ts.net:3128\" \"HTTPS_PROXY=http://feri-devops-machine.taild55be.ts.net:3128\"" > /lib/systemd/system/containerd.service.d/http-proxy.conf'
-	sudo minikube -p $(PROFILE) ssh -- sudo systemctl daemon-reload
-	sudo minikube -p $(PROFILE) ssh -- sudo systemctl restart containerd
+	@echo "Iterate over all nodes to set containerd proxy configuration..."
+	for node in $(shell sudo minikube -p $(PROFILE) node list); do \
+		echo "Configuring containerd proxy on node $$node..."; \
+		sudo minikube -p $(PROFILE) ssh --node=$$node -- sudo mkdir -p /lib/systemd/system/containerd.service.d; \
+		sudo minikube -p $(PROFILE) ssh --node=$$node -- sudo touch /lib/systemd/system/containerd.service.d/http-proxy.conf; \
+		sudo minikube -p $(PROFILE) ssh --node=$$node -- sudo bash -c 'echo -e "[Service]\nEnvironment=\"HTTP_PROXY=http://feri-devops-machine.taild55be.ts.net:3128\" \"HTTPS_PROXY=http://feri-devops-machine.taild55be.ts.net:3128\"" > /lib/systemd/system/containerd.service.d/http-proxy.conf'
+
+		sudo minikube -p $(PROFILE) ssh --node=$$node -- sudo systemctl daemon-reload
+		sudo minikube -p $(PROFILE) ssh --node=$$node -- sudo systemctl restart containerd
 	
 	@echo "Enable addons..."
 	sudo minikube addons enable ingress -p $(PROFILE)
