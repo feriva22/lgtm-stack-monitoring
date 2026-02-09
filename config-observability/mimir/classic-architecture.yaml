@@ -7,6 +7,12 @@ mimir-distributed:
     enabled: false
 
   mimir:
+    # Enabled mimir ingress for center of the architecture
+    ingress:
+      enabled: true
+      ingressClassName: nginx
+      hosts:
+        - mimir.feri-devops-machine.deploy-at.my.id
     structuredConfig:
       limits:
         # Limit queries to 500 days. You can override this on a per-tenant basis.
