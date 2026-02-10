@@ -23,7 +23,7 @@ alloy:
         // Add ruler integration
         mimir.rules.kubernetes "local" {
           address = "http://mimir-ruler.observability.svc.cluster.local:8080"
-          tenant_id = "PT-Pos Indonesia Cluster-Production-Jakarta"
+          tenant_id = "PT-Pos-Indonesia-Cluster-Production-Jakarta"
         }
 
         // 1. Discover and scrape all ServiceMonitors (Node Exporter, KSM, etc.)
@@ -102,7 +102,7 @@ alloy:
             // If your Mimir has multi-tenancy enabled (default in some charts), 
             // you MUST provide a Tenant ID header.
             headers = {
-              "X-Scope-OrgID" = "PT-Pos Indonesia Cluster-Production-Jakarta", 
+              "X-Scope-OrgID" = "PT-Pos-Indonesia-Cluster-Production-Jakarta", 
             }
             
             // If you set up Basic Auth for Mimir, add this:
@@ -119,6 +119,6 @@ alloy:
             "cluster" = "EKS-MultiTenant-Prod-JKT-1",
             "cloud"   = "aws",
             "environment" = "production",
-            "region" = "ap-southeast-3"
+            "region" = "ap-southeast-3",
           }
         }
