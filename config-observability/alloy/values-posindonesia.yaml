@@ -1,0 +1,124 @@
+alloy:
+  controller:
+    # -- Type of controller to use for deploying Grafana Alloy in the cluster.
+    # Must be one of 'daemonset', 'deployment', or 'statefulset'.
+    type: 'statefulset'
+    rbac:
+      create: true # This allows Alloy to read ServiceMonitors
+  alloy:
+    clustering:
+      enabled: false
+    configMap:
+      content: |-
+        logging {
+          level  = "info"
+          format = "logfmt"
+        }
+
+        // Enable livedebugging for troubleshooting
+        livedebugging {
+          enabled = true
+        }
+        
+        // Add ruler integration
+        mimir.rules.kubernetes "local" {
+          address = "http://mimir-ruler.observability.svc.cluster.local:8080"
+          tenant_id = "PT-Pos Indonesia Cluster-Production-Jakarta"
+        }
+
+        // 1. Discover and scrape all ServiceMonitors (Node Exporter, KSM, etc.)
+        prometheus.operator.servicemonitors "kube_stack" {
+          forward_to = [prometheus.remote_write.mimir.receiver]
+        }
+
+        // 2. Discover and scrape all PodMonitors (if you have any)
+        prometheus.operator.podmonitors "kube_stack" {
+          forward_to = [prometheus.remote_write.mimir.receiver]
+        }
+
+        // 3. Discover mimir metrics endpoint for self-monitoring
+        discovery.kubernetes "mimir_services" {
+          role = "service"
+        }
+
+        discovery.relabel "mimir_targets" {
+          targets = discovery.kubernetes.mimir_services.targets
+
+          // 1. Only keep services where the app name is exactly 'mimir'
+          rule {
+            source_labels = ["__meta_kubernetes_service_label_app_kubernetes_io_name"]
+            regex         = "mimir"
+            action        = "keep"
+          }
+
+          // 2. Only keep the 'http-metrics' port (don't scrape GRPC ports)
+          rule {
+            source_labels = ["__meta_kubernetes_service_port_name"]
+            regex         = "http-metrics"
+            action        = "keep"
+          }
+
+          // 3. EXPLICIT NAMESPACE LABEL (Required for cortex_build_info)
+          rule {
+            source_labels = ["__meta_kubernetes_namespace"]
+            target_label  = "namespace"
+          }
+
+          // 4. Map the Component (distributor, ingester, etc.)
+          rule {
+            source_labels = ["__meta_kubernetes_service_label_app_kubernetes_io_component"]
+            target_label  = "component"
+          }
+
+          // 5. Create the Job label (standard format: <namespace>/<component>)
+          rule {
+            source_labels = ["__meta_kubernetes_namespace", "__meta_kubernetes_service_label_app_kubernetes_io_component"]
+            separator     = "/"
+            target_label  = "job"
+          }
+
+          // 6. Map the Zone (from your metadata: __meta_kubernetes_service_label_zone)
+          rule {
+            source_labels = ["__meta_kubernetes_service_label_zone"]
+            target_label  = "zone"
+          }
+        }
+
+        //5. Scrape the discovered targets
+        prometheus.scrape "mimir_metrics" {
+          targets    = discovery.relabel.mimir_targets.output
+          forward_to = [prometheus.remote_write.mimir.receiver]
+
+          // Set the frequency here (e.g., 60s or 15s)
+          scrape_interval = "60s"
+        }
+
+        // 3. Define the Remote Write destination (Mimir)
+        prometheus.remote_write "mimir" {
+          endpoint {
+            // This points to the Mimir Gateway service
+            url = "http://mimir-gateway.observability.svc.cluster.local/api/v1/push"
+
+            // If your Mimir has multi-tenancy enabled (default in some charts), 
+            // you MUST provide a Tenant ID header.
+            headers = {
+              "X-Scope-OrgID" = "PT-Pos Indonesia Cluster-Production-Jakarta", 
+            }
+            
+            // If you set up Basic Auth for Mimir, add this:
+            /*
+            basic_auth {
+              username = "your-user"
+              password = "your-password"
+            }
+            */
+          }
+
+          // Optional: Global labels added to EVERY metric
+          external_labels = {
+            "cluster" = "EKS-MultiTenant-Prod-JKT-1",
+            "cloud"   = "aws"
+            "environment" = "production"
+            "region" = "ap-southeast-3"
+          }
+        }
