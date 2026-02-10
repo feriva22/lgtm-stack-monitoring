@@ -56,7 +56,7 @@ mimir-distributed:
         memory: 512Mi # Distributors are stateless and light
 
   ingester:
-    replicas: 2  # Reduced from 3 (Matches RF=2)
+    replicas: 1  # Reduced from 3 (Matches RF=2)
     persistentVolume:
       size: 20Gi # Reduced (We flush to S3 every 2h anyway)
     resources:
@@ -67,7 +67,7 @@ mimir-distributed:
       enabled: false  # Disable for small setups to save resources
 
   store_gateway:
-    replicas: 2  # Matches RF=2
+    replicas: 1  # Matches RF=2
     persistentVolume:
       size: 10Gi
     resources:
