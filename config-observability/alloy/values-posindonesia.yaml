@@ -117,8 +117,8 @@ alloy:
           // Optional: Global labels added to EVERY metric
           external_labels = {
             "cluster" = "EKS-MultiTenant-Prod-JKT-1",
-            "cloud"   = "aws"
-            "environment" = "production"
+            "cloud"   = "aws",
+            "environment" = "production",
             "region" = "ap-southeast-3"
           }
         }
