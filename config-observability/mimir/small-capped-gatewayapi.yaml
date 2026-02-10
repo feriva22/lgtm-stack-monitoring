@@ -7,12 +7,18 @@ mimir-distributed:
   minio:
     enabled: false
     
+  global:
+    extraEnv:
+      - name: MY_POD_IP
+        valueFrom:
+          fieldRef:
+            fieldPath: status.podIP
   # Global Config: Reduce replication to save 33% of resources
   mimir:
     structuredConfig:
       # This is the only required setting, it tells Mimir to use the gossip protocol for cluster membership and replication
       memberlist:
-        advertise_addr: {CONTAINER_OUTBOUNDED_IP}
+        advertise_addr: ${MY_POD_IP}
       common:
         storage:
           backend: s3
