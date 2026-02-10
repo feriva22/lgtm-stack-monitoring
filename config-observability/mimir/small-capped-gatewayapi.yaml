@@ -20,17 +20,23 @@ mimir-distributed:
 
       blocks_storage:
         s3:
-          bucket_name: mimir-blocks
+          bucket_name: observability-k8s-pos-indonesia
+          endpoint: s3.ap-southeast-3.amazonaws.com
+          region: ap-southeast-3
         storage_prefix: tsdb
 
       alertmanager_storage:
         s3:
-          bucket_name: mimir-alertmanager
+          bucket_name: observability-k8s-pos-indonesia
+          endpoint: s3.ap-southeast-3.amazonaws.com
+          region: ap-southeast-3
         storage_prefix: alertmanager
 
       ruler_storage:
         s3:
-          bucket_name: mimir-ruler
+          bucket_name: observability-k8s-pos-indonesia
+          endpoint: s3.ap-southeast-3.amazonaws.com
+          region: ap-southeast-3
         storage_prefix: ruler
       
       limits:
