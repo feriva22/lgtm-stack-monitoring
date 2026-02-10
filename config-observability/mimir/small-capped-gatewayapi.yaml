@@ -49,6 +49,8 @@ mimir-distributed:
 
   kafka:
     enabled: true
+    persistentVolume:
+      storageClass: "gp3-automode-eks-dev"
     resources:
       requests:
         cpu: 1
@@ -66,6 +68,7 @@ mimir-distributed:
   compactor:
     persistentVolume:
       size: 30Gi # Reduced from 50Gi
+      storageClass: "gp3-automode-eks-dev"
     resources:
       requests:
         cpu: 500m
@@ -82,6 +85,7 @@ mimir-distributed:
     replicas: 1  # Reduced from 3 (Matches RF=2)
     persistentVolume:
       size: 20Gi # Reduced (We flush to S3 every 2h anyway)
+      storageClass: "gp3-automode-eks-dev"
     resources:
       requests:
         cpu: 500m
@@ -93,6 +97,7 @@ mimir-distributed:
     replicas: 1  # Matches RF=2
     persistentVolume:
       size: 10Gi
+      storageClass: "gp3-automode-eks-dev"
     resources:
       requests:
         cpu: 200m
