@@ -49,8 +49,8 @@ mimir-distributed:
 
   kafka:
     enabled: true
-    persistentVolume:
-      storageClass: "gp3-automode-eks-dev"
+    persistence:
+      storageClassName: "gp3-automode-eks-dev"
     resources:
       requests:
         cpu: 1
@@ -60,6 +60,8 @@ mimir-distributed:
 
   alertmanager:
     replicas: 1  # Minimalist (Single pod is enough for basic alerting)
+    persistentVolume:
+      storageClass: "gp3-automode-eks-dev"
     resources:
       requests:
         cpu: 100m
