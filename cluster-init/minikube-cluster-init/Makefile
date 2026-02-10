@@ -107,6 +107,22 @@ setup-credential-for-argocd:
 	if [ -z "$$TOKEN" ]; then echo "Error: Token not found in secret"; exit 1; fi; \
 	echo "Token: $$TOKEN"
 
+connect-every-kubernetes-cluster-network:
+	@echo "Connecting all minikube clusters containers into another minikube network..."
+	@for profile in $(PROFILES); do \
+		network_name=$$(sudo docker inspect -f '{{.HostConfig.NetworkMode}}' minikube -p $$profile); \
+		echo "Cluster $$profile uses network $$network_name"; \
+		for target_profile in $(PROFILES); do \
+			if [ "$$target_profile" != "$$profile" ]; then \
+				target_container=$$(sudo docker ps --filter "name=minikube -p $$target_profile" --format "{{.ID}}"); \
+				echo "Connecting container $$target_container of cluster $$target_profile to network $$network_name..."; \
+				sudo docker network connect $$network_name $$target_container || true; \
+			fi; \
+		done; \
+	done
+	
+	@echo "All networks connected."
+
 start-all:
 	@echo "Starting all profiles: $(PROFILES)"
 	@for profile in $(PROFILES); do \
