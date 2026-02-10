@@ -3,13 +3,36 @@ mimir-distributed:
   ingress:
     enabled: false
 
-  # enable minio for object storage
+  # disable minio for object storage
   minio:
-    enabled: true
+    enabled: false
     
   # Global Config: Reduce replication to save 33% of resources
   mimir:
     structuredConfig:
+      common:
+        storage:
+          backend: s3
+          s3:
+            bucket_name: observability-k8s-pos-indonesia
+            endpoint: s3.ap-southeast-3.amazonaws.com
+            region: ap-southeast-3
+
+      blocks_storage:
+        s3:
+          bucket_name: mimir-blocks
+        storage_prefix: tsdb
+
+      alertmanager_storage:
+        s3:
+          bucket_name: mimir-alertmanager
+        storage_prefix: alertmanager
+
+      ruler_storage:
+        s3:
+          bucket_name: mimir-ruler
+        storage_prefix: ruler
+      
       limits:
         # Limit queries to 500 days. You can override this on a per-tenant basis.
         max_total_query_length: 12000h
