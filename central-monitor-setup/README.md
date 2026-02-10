@@ -1,0 +1,1 @@
+This is only for EKS Cluster with using karpenter

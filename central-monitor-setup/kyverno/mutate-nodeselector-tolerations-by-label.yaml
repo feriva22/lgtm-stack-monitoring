@@ -1,0 +1,41 @@
+apiVersion: kyverno.io/v1
+kind: Policy
+metadata:
+  name: add-karpenter-nodeselector
+  namespace: observability
+  annotations:
+    policies.kyverno.io/title: Add Karpenter nodeSelector
+    policies.kyverno.io/category: Karpenter, EKS Best Practices
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >- 
+      Select proper nodeselector & Tolerations for specific namespace.
+spec:
+  rules:
+  - name: add-medium
+    match:
+      any:
+      - resources:
+          kinds:
+          - Pod
+          namespaceSelector:
+            matchLabels:
+              tenant: observability 
+              environment: production
+    mutate:
+      patchStrategicMerge:
+        spec:
+          nodeSelector:
+            tenant: observability
+          tolerations:
+          - key: "tenant"
+            value: "observability"
+            operator: "Equal"
+            effect: "NoSchedule"
+          - key: "node.kubernetes.io/not-ready"
+            operator: "Exists"
+            effect: "NoExecute"
+            tolerationSeconds: 300
+          - key: "node.kubernetes.io/unreachable"
+            operator: "Exists"
+            effect: "NoExecute"
+            tolerationSeconds: 300

@@ -1,0 +1,48 @@
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: nodepool-tenant-observability
+spec:
+  disruption:
+    budgets:
+      - nodes: 10%
+      - duration: 8h
+        nodes: '0'
+        schedule: 0 9 * * mon-fri
+    consolidateAfter: 10m
+    consolidationPolicy: WhenEmptyOrUnderutilized
+  limits:
+    ram: 16Gi
+  template:
+    metadata:
+      labels:
+        tenant: observability
+    spec:
+      expireAfter: 336h
+      nodeClassRef:
+        group: eks.amazonaws.com
+        kind: NodeClass
+        name: default
+      requirements:
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values:
+            - on-demand
+            - spot
+        - key: eks.amazonaws.com/instance-category
+          operator: In
+          values:
+            - t
+        - key: kubernetes.io/arch
+          operator: In
+          values:
+            - amd64
+            - arm64
+        - key: kubernetes.io/os
+          operator: In
+          values:
+            - linux
+      taints:
+        - effect: NoSchedule
+          key: tenant
+          value: observability
