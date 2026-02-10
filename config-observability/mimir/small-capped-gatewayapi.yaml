@@ -10,6 +10,9 @@ mimir-distributed:
   # Global Config: Reduce replication to save 33% of resources
   mimir:
     structuredConfig:
+      # This is the only required setting, it tells Mimir to use the gossip protocol for cluster membership and replication
+      memberlist:
+        advertise_addr: {CONTAINER_OUTBOUNDED_IP}
       common:
         storage:
           backend: s3
