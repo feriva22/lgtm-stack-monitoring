@@ -67,6 +67,8 @@ mimir-distributed:
     persistence:
       enabled: false # Kafka is only used for replication in this setup, so we can disable persistence to save resources, use emptyDir for storage
       storageClassName: "gp3-automode-eks-dev"
+    nodeSelector:
+      karpenter.sh/capacity-type: on-demand
     resources:
       requests:
         cpu: 1
@@ -78,6 +80,8 @@ mimir-distributed:
     replicas: 1  # Minimalist (Single pod is enough for basic alerting)
     persistentVolume:
       storageClass: "gp3-automode-eks-dev"
+    nodeSelector:
+      karpenter.sh/capacity-type: on-demand
     resources:
       requests:
         cpu: 100m
@@ -87,6 +91,8 @@ mimir-distributed:
     persistentVolume:
       size: 30Gi # Reduced from 50Gi
       storageClass: "gp3-automode-eks-dev"
+    nodeSelector:
+      karpenter.sh/capacity-type: on-demand
     resources:
       requests:
         cpu: 500m
@@ -94,6 +100,8 @@ mimir-distributed:
 
   distributor:
     replicas: 2
+    nodeSelector:
+      karpenter.sh/capacity-type: spot
     resources:
       requests:
         cpu: 200m
@@ -104,6 +112,8 @@ mimir-distributed:
     persistentVolume:
       size: 20Gi # Reduced (We flush to S3 every 2h anyway)
       storageClass: "gp3-automode-eks-dev"
+    nodeSelector:
+      karpenter.sh/capacity-type: on-demand
     resources:
       requests:
         cpu: 500m
@@ -116,6 +126,8 @@ mimir-distributed:
     persistentVolume:
       size: 10Gi
       storageClass: "gp3-automode-eks-dev"
+    nodeSelector:
+      karpenter.sh/capacity-type: on-demand
     resources:
       requests:
         cpu: 200m
@@ -125,6 +137,8 @@ mimir-distributed:
 
   querier:
     replicas: 2 # 2 for basic HA on queries
+    nodeSelector:
+      karpenter.sh/capacity-type: spot
     resources:
       requests:
         cpu: 100m
@@ -132,6 +146,8 @@ mimir-distributed:
 
   query_frontend:
     replicas: 1
+    nodeSelector:
+      karpenter.sh/capacity-type: spot
     resources:
       requests:
         cpu: 100m
@@ -145,6 +161,8 @@ mimir-distributed:
 
   gateway:
     replicas: 1
+    nodeSelector:
+      karpenter.sh/capacity-type: on-demand
     resources:
       requests:
         cpu: 100m
