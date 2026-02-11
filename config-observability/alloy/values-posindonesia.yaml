@@ -5,6 +5,8 @@ alloy:
     type: 'statefulset'
     rbac:
       create: true # This allows Alloy to read ServiceMonitors
+    nodeSelector:
+      karpenter.sh/capacity-type: on-demand
   alloy:
     clustering:
       enabled: false
