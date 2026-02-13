@@ -30,12 +30,12 @@ alloy:
 
         // 1. Discover and scrape all ServiceMonitors (Node Exporter, KSM, etc.)
         prometheus.operator.servicemonitors "kube_stack" {
-          forward_to = [prometheus.remote_write.mimir.receiver]
+          forward_to = [prometheus.relabel.add_global_labels.receiver]
         }
 
         // 2. Discover and scrape all PodMonitors (if you have any)
         prometheus.operator.podmonitors "kube_stack" {
-          forward_to = [prometheus.remote_write.mimir.receiver]
+          forward_to = [prometheus.relabel.add_global_labels.receiver]
         }
 
         // 3. Discover mimir metrics endpoint for self-monitoring
@@ -89,10 +89,33 @@ alloy:
         //5. Scrape the discovered targets
         prometheus.scrape "mimir_metrics" {
           targets    = discovery.relabel.mimir_targets.output
-          forward_to = [prometheus.remote_write.mimir.receiver]
+          forward_to = [prometheus.relabel.add_global_labels.receiver]
 
           // Set the frequency here (e.g., 60s or 15s)
           scrape_interval = "60s"
+        }
+
+
+        // 1. Create a relabeling component to force your global labels
+        prometheus.relabel "add_global_labels" {
+          forward_to = [prometheus.remote_write.mimir.receiver]
+
+          rule {
+            target_label = "cluster"
+            replacement  = "EKS-MultiTenant-Prod-JKT-1"
+          }
+          rule {
+            target_label = "cloud"
+            replacement  = "aws"
+          }
+          rule {
+            target_label = "environment"
+            replacement  = "production"
+          }
+          rule {
+            target_label = "region"
+            replacement  = "ap-southeast-3"
+          }
         }
 
         // 3. Define the Remote Write destination (Mimir)
@@ -116,11 +139,4 @@ alloy:
             */
           }
 
-          // Optional: Global labels added to EVERY metric
-          external_labels = {
-            "cluster" = "EKS-MultiTenant-Prod-JKT-1",
-            "cloud"   = "aws",
-            "environment" = "production",
-            "region" = "ap-southeast-3",
-          }
         }
