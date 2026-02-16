@@ -63,6 +63,7 @@ mimir-distributed:
         ruler_max_rules_per_rule_group: 0
         # Maximum number of rule groups per-tenant. 0 to disable.
         ruler_max_rule_groups_per_tenant: 0  
+        max_global_series_per_user: 0 # 0 means no limit, set to a reasonable number if you want to prevent a single tenant from consuming all resources
 
   kafka:
     enabled: true
