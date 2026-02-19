@@ -23,6 +23,16 @@ spec:
             type: PathPrefix
             # Defaults to / if no path is provided
             value: {{ .Values.mimirGateway.path | default "/" | quote }}
+      # Rewrite filter logic
+      {{- if and .Values.mimirGateway.path (ne .Values.mimirGateway.path "/") }}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: "/"
+      {{- end }}
+      
       backendRefs:
         - name: mimir-gateway
           port: {{ .Values.mimirGateway.servicePort | default 80 }}
