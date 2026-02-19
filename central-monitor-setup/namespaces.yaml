@@ -3,5 +3,4 @@ kind: Namespace
 metadata:
   labels:
     tenant: observability
-    environment: production
   name: observability
