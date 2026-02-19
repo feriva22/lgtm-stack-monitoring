@@ -1,0 +1,15 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: GatewayClass
+metadata:
+  name: eg-observability-gateway-class
+  namespace: observability
+  labels:
+    app: envoy-gateway-observability
+    prevent-delete: "true"
+spec:
+  controllerName: gateway.envoyproxy.io/gatewayclass-controller
+  parametersRef:
+    group: gateway.envoyproxy.io
+    kind: EnvoyProxy
+    name: eg-envoy-proxy-observability
+    namespace: observability

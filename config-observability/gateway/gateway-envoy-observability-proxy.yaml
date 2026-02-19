@@ -1,0 +1,73 @@
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: EnvoyProxy
+metadata:
+  name: eg-envoy-proxy-observability
+  namespace: observability
+  labels:
+    app: envoy-gateway-observability
+    prevent-delete: "true"
+spec:
+  mergeGateways: true
+  provider:
+    type: Kubernetes
+    kubernetes:
+      envoyHpa:
+        minReplicas: 1
+        maxReplicas: 3
+        metrics:
+          - resource:
+              name: cpu
+              target:
+                averageUtilization: 60
+                type: Utilization
+            type: Resource
+          - resource:
+              name: memory
+              target:
+                averageUtilization: 70
+                type: Utilization
+            type: Resource
+      envoyDeployment:
+        pod:
+          nodeSelector:
+            tenant: observability
+          tolerations:
+          - key: "tenant"
+            operator: "Equal"
+            value: "observability"
+      #    topologySpreadConstraints:
+      #      - maxSkew: 1
+      #        topologyKey: "topology.kubernetes.io/zone"
+      #        whenUnsatisfiable: ScheduleAnyway
+      #        labelSelector:
+      #          matchLabels:
+      #            app.kubernetes.io/name: envoy
+      #    affinity:
+      #      podAntiAffinity:
+      #        preferredDuringSchedulingIgnoredDuringExecution:
+      #          - weight: 100 # Highest possible weight for maximum preference
+      #            podAffinityTerm:
+      #              # This ensures we only consider pods with the 'app: envoy' label
+      #              labelSelector:
+      #                  matchExpressions:
+      #                    - key: app.kubernetes.io/name
+      #                      operator: In
+      #                      values:
+      #                        - envoy
+      #                # This is the crucial part:
+      #                # It checks the 'app: envoy' label but enforces separation based on the topology key:
+      #              topologyKey: "topology.kubernetes.io/zone"
+      ## Additional to set internet facing of the loadbalancer
+      envoyService:
+        type: LoadBalancer
+        labels:
+          app: envoy-gateway-observability
+          prevent-delete: "true"
+        annotations:
+          #service.beta.kubernetes.io/aws-load-balancer-scheme: internal # supported values (internal/internet-facing)
+          #service.beta.kubernetes.io/aws-load-balancer-type: external
+          service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+
+          # New in cluster 1.32
+          service.beta.kubernetes.io/aws-load-balancer-type: nlb
+          service.beta.kubernetes.io/aws-load-balancer-internal: 'true'

@@ -1,0 +1,32 @@
+{{- if .Values.mimirGateway.enabled -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  # Using generateName provides an "automatic" prefix followed by a random suffix
+  generateName: "mimir-gateway-httproute-"
+  namespace: {{ .Release.Namespace | default "observability" }}
+  labels:
+    {{- include "mimir.labels" . | nindent 4 }}
+spec:
+  parentRefs:
+    - kind: Gateway
+      group: gateway.networking.k8s.io
+      name: {{ .Values.mimirGateway.parentGatewayName | quote }}
+      namespace: {{ .Values.mimirGateway.parentGatewayNamespace | default .Release.Namespace | quote }}
+  # Only render hostnames if the list is provided and not empty
+  {{- if .Values.mimirGateway.hostnames }}
+  hostnames:
+    {{- range .Values.mimirGateway.hostnames }}
+    - {{ . | quote }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            # Defaults to / if no path is provided
+            value: {{ .Values.mimirGateway.path | default "/" | quote }}
+      backendRefs:
+        - name: mimir-gateway
+          port: {{ .Values.mimirGateway.servicePort | default 80 }}
+{{- end }}

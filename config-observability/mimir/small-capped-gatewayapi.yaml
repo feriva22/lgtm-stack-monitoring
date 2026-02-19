@@ -1,3 +1,16 @@
+mimirGateway:
+  enabled: true
+  parentGatewayName: "eg-observability"
+  parentGatewayNamespace: "observability"
+  
+  # Leave empty or comment out to make hostnames optional (catch-all)
+  hostnames: 
+    - "mimir.example.com"
+  
+  # Custom path prefix
+  path: "/mimir"
+  
+  servicePort: 80
 mimir-distributed:
   # Enabled mimir ingress for center of the architecture
   ingress:
