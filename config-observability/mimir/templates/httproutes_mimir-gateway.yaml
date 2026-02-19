@@ -2,7 +2,7 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: {{ printf "%s-mimir-gateway" .Release.Name | truncate 63 | trimSuffix "-" }}
+  name: {{ printf "%s-mimir-gateway" .Release.Name | trunc 63 | trimSuffix "-" }}
   namespace: {{ .Release.Namespace | default "observability" }}
 spec:
   parentRefs:
