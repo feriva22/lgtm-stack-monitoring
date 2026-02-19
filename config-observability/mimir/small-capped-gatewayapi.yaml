@@ -5,7 +5,7 @@ mimirGateway:
   
   # Leave empty or comment out to make hostnames optional (catch-all)
   hostnames: 
-    - "mimir.example.com"
+    - "metrics.posindonesia.deploy-at.my.id"
   
   # Custom path prefix
   path: "/mimir"
