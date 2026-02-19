@@ -2,8 +2,7 @@
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  # Using generateName provides an "automatic" prefix followed by a random suffix
-  generateName: "mimir-gateway-httproute-"
+  name: {{ printf "%s-mimir-gateway" .Release.Name | truncate 63 | trimSuffix "-" }}
   namespace: {{ .Release.Namespace | default "observability" }}
 spec:
   parentRefs:
