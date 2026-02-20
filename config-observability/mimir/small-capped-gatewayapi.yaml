@@ -91,7 +91,7 @@ mimir-distributed:
       karpenter.sh/capacity-type: on-demand
     resources:
       requests:
-        cpu: 1
+        cpu: 200m
         memory: 1Gi
       limits: 
         memory: 1Gi 
