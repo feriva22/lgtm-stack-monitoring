@@ -8,7 +8,7 @@ mimirGateway:
     - "metrics.posindonesia.deploy-at.my.id"
   
   # Custom path prefix
-  path: "/mimir"
+  path: "/"
   
   servicePort: 80
 mimir-distributed:
