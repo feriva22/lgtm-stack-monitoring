@@ -83,7 +83,7 @@ mimir-distributed:
 
   kafka:
     enabled: true
-    replicas: 2
+    replicas: 3
     persistence:
       enabled: false # Kafka is only used for replication in this setup, so we can disable persistence to save resources, use emptyDir for storage
       storageClassName: "gp3-automode-eks-dev"
