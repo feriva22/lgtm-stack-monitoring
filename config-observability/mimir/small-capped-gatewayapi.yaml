@@ -60,7 +60,10 @@ mimir-distributed:
           endpoint: s3.ap-southeast-3.amazonaws.com
           region: ap-southeast-3
         storage_prefix: ruler
-      
+      ingest_storage:
+        enabled: true
+        kafka:
+          producer_max_record_size_bytes: 20971520 # 20MB, adjust if you have larger samples or want to optimize for fewer/larger messages
       limits:
         ingestion_rate: 2000000 # Limit ingestion to 2M samples/second across the cluster
         ingestion_burst_size: 4000000 # Allow bursts of up to 4M samples
