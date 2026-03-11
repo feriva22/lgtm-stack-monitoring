@@ -6,6 +6,7 @@ mimirGateway:
   # Leave empty or comment out to make hostnames optional (catch-all)
   hostnames: 
     - "metrics.posindonesia.deploy-at.my.id"
+    - "observability.posindonesia.co.id"
   
   # Custom path prefix
   path: "/"
