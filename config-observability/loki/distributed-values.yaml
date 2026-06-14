@@ -10,6 +10,9 @@ loki:
     enabled: true #enabled first for testing, but should be disabled for production as we will use mimir's minio for object storage
     nodeSelector:
       karpenter.sh/capacity-type: on-demand # Ingesters are stateful and should run on stable on-demand instances
+    persistence:
+      enabled: true
+      storageClassName: "gp3-automode-eks-dev"
   
   #commonLabels:
   #  labelA: valueA
@@ -50,7 +53,7 @@ loki:
     nodeSelector:
       karpenter.sh/capacity-type: spot # Queriers are stateless and can run on cheaper spot instances, but ensure you have enough to handle the load and avoid OOMing
     resources: {} # Need to change after get stable/idle resource usage, but start with something small to avoid OOMing
-    
+
   ingester:
     replicas: 1
     zoneAwareReplication:
