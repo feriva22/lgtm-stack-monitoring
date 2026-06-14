@@ -70,15 +70,6 @@ loki:
     ingress:
       enabled: false # Disable built-in ingress for gateway, as we will use Gateway API to expose it, but can be enabled if desired for testing or if you want to use the built-in ingress
 
-  route:
-    main:
-      enabled: false
-      kind: HTTPRoute
-      parentRefs:
-        - name: eg-observability
-          namespace: observability
-      hostnames:
-        - log.posindonesia.deploy-at.my.id
 
   # Tell loki to use the distributed deployment mode, this will enable the necessary components and disable the single binary mode
   deploymentMode: Distributed
