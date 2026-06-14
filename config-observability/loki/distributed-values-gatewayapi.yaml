@@ -1,3 +1,17 @@
+lokiGateway:
+  enabled: true
+  parentGatewayName: "eg-observability"
+  parentGatewayNamespace: "observability"
+  
+  # Leave empty or comment out to make hostnames optional (catch-all)
+  hostnames: 
+    - "log.posindonesia.deploy-at.my.id"
+  
+  # Custom path prefix
+  path: "/logging"
+  
+  servicePort: 80
+
 loki:
 
   # Disable ingress by default, as it's often not needed in distributed mode and can be added via gateway if desired
@@ -58,7 +72,7 @@ loki:
 
   route:
     main:
-      enabled: true
+      enabled: false
       kind: HTTPRoute
       parentRefs:
         - name: eg-observability
