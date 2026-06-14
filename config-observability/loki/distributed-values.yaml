@@ -34,6 +34,8 @@ loki:
       bucketNames:
         chunks: chunks
         ruler: ruler
+      object_store:
+        storage_prefix: loki # Set a prefix for loki's object storage, this will help to organize and separate loki's data in the object store, but can be removed if you want to use the root of the bucket
     commonConfig:
       replication_factor: 1 # Set replication factor to 1 for loki, as it's often not needed in distributed mode and can add overhead, but can be increased if desired for higher availability
     ingester:
