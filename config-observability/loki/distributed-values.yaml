@@ -1,4 +1,4 @@
-loki-distributed:
+loki:
 
   # Disable ingress by default, as it's often not needed in distributed mode and can be added via gateway if desired
   ingress:

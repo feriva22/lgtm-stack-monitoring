@@ -6,6 +6,6 @@ version: 1.0.0
 appVersion: "17.4.0"
 
 dependencies:
-  - name: loki-distributed
+  - name: loki
     version: "17.4.0" # Or your preferred version
     repository: "https://grafana-community.github.io/helm-charts"
