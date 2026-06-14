@@ -1,2 +1,5 @@
 tempoGateway:
   enabled: false
+tempo:
+  nodeSelector:
+    karpenter.sh/capacity-type: on-demand # Tempo is stateful and should run on stable on-demand instances
