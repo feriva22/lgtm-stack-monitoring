@@ -95,6 +95,11 @@ loki:
     nodeSelector:
       karpenter.sh/capacity-type: on-demand # Index gateways are stateful and should run on stable on-demand instances, but can be reduced to 1 for small setups
     resources: {} # Need to change after get stable/idle resource usage, but start with something small to avoid OOMing
+  ruler:
+    replicas: 1
+    nodeSelector:
+      karpenter.sh/capacity-type: on-demand # Rulers are stateful and should run on stable on-demand instances, but can be reduced to 1 for small setups
+    resources: {} # Need to change after get stable/idle resource usage, but start with something small to avoid OOMing
 
   # Test Only Components - These are not required for a basic distributed setup, but can be enabled for testing or if you have specific use cases that require them
   test:
