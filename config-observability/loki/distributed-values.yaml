@@ -34,6 +34,8 @@ loki:
       bucketNames:
         chunks: chunks
         ruler: ruler
+    commonConfig:
+      replication_factor: 1 # Set replication factor to 1 for loki, as it's often not needed in distributed mode and can add overhead, but can be increased if desired for higher availability
     ingester:
       chunk_encoding: snappy
     tracing:
