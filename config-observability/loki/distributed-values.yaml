@@ -34,6 +34,7 @@ loki:
       bucketNames:
         chunks: chunks
         ruler: ruler
+      use_thanos_objstore: true # Enable Thanos object store for loki, this will allow loki to use the same object store configuration as mimir and simplify the setup, but can be disabled if you want to use a different object store for loki
       object_store:
         storage_prefix: loki # Set a prefix for loki's object storage, this will help to organize and separate loki's data in the object store, but can be removed if you want to use the root of the bucket
     commonConfig:
