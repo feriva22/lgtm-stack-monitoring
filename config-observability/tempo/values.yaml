@@ -3,3 +3,7 @@ tempoGateway:
 tempo:
   nodeSelector:
     karpenter.sh/capacity-type: on-demand # Tempo is stateful and should run on stable on-demand instances
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: "gp3-automode-eks-dev"
