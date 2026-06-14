@@ -11,7 +11,7 @@ loki:
     nodeSelector:
       karpenter.sh/capacity-type: on-demand # Ingesters are stateful and should run on stable on-demand instances
     persistence:
-      enabled: true
+      enabled: false # Disable persistence for minio, as we will use mimir's minio for object storage, but can be enabled if desired for testing or if you want to use minio for loki's object storage
       storageClassName: "gp3-automode-eks-dev"
   
   #commonLabels:
