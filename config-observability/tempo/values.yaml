@@ -6,4 +6,4 @@ tempo:
   persistence:
     enabled: true
     size: 10Gi
-    storageClass: "gp3-automode-eks-dev"
+    storageClassName: "gp3-automode-eks-dev"
