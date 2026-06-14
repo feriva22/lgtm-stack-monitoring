@@ -42,6 +42,10 @@ spec:
           operator: In
           values:
             - linux
+        # Define the exact zone you want Karpenter to use
+        - key: topology.kubernetes.io/zone
+          operator: In
+          values: ["ap-southeast-3a"]
       taints:
         - effect: NoSchedule
           key: tenant
