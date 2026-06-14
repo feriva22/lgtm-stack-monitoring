@@ -5,6 +5,7 @@ loki:
     enabled: false
 
   # Disable for minio, as we will use it for mimir
+  ignoreMinioDeprecation: false
   minio:
     enabled: true #enabled first for testing, but should be disabled for production as we will use mimir's minio for object storage
     nodeSelector:
