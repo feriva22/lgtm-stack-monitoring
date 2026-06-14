@@ -1,0 +1,39 @@
+{{- if .Values.lokiGateway.enabled -}}
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: {{ printf "%s-loki-gateway" .Release.Name | trunc 63 | trimSuffix "-" }}
+  namespace: {{ .Release.Namespace | default "observability" }}
+spec:
+  parentRefs:
+    - group: gateway.networking.k8s.io
+      kind: Gateway
+      name: {{ .Values.lokiGateway.parentGatewayName | quote }}
+      namespace: {{ .Values.lokiGateway.parentGatewayNamespace | default .Release.Namespace | quote }}
+  # Only render hostnames if the list is provided and not empty
+  {{- if .Values.lokiGateway.hostnames }}
+  hostnames:
+    {{- range .Values.lokiGateway.hostnames }}
+    - {{ . | quote }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            # Defaults to / if no path is provided
+            value: {{ .Values.lokiGateway.path | default "/" | quote }}
+      # Rewrite filter logic
+      {{- if and .Values.lokiGateway.path (ne .Values.lokiGateway.path "/") }}
+      filters:
+        - type: URLRewrite
+          urlRewrite:
+            path:
+              type: ReplacePrefixMatch
+              replacePrefixMatch: "/"
+      {{- end }}
+      
+      backendRefs:
+        - name: loki-gateway
+          port: {{ .Values.lokiGateway.servicePort | default 80 }}
+{{- end }}
