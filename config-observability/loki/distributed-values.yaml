@@ -40,8 +40,8 @@ loki:
         s3:
           endpoint: loki-minio.observability.svc:9000
           insecure: true
-          access_key: root-user
-          secret_key: supersecretpassword
+          access_key_id: root-user
+          secret_access_key: supersecretpassword
     commonConfig:
       replication_factor: 1 # Set replication factor to 1 for loki, as it's often not needed in distributed mode and can add overhead, but can be increased if desired for higher availability
     ingester:
