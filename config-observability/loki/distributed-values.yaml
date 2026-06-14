@@ -1,0 +1,115 @@
+loki-distributed:
+
+  # Disable ingress by default, as it's often not needed in distributed mode and can be added via gateway if desired
+  ingress:
+    enabled: false
+
+  # Disable for minio, as we will use it for mimir
+  minio:
+    enabled: false
+  
+  #commonLabels:
+  #  labelA: valueA
+  #  labelA: valueB
+
+  loki:
+    schemaConfig:
+      configs:
+        - from: 2024-04-01
+          store: tsdb
+          object_store: s3
+          schema: v13
+          index:
+            prefix: loki_index_
+            period: 24h
+    ingester:
+      chunk_encoding: snappy
+    tracing:
+      enabled: false #disable tracing for loki, as it can add overhead and is often not needed in distributed mode, can be enabled if desired
+    querier:
+      # Default is 4, if you have enough memory and CPU you can increase, reduce if OOMing
+      max_concurrent: 4
+
+  #gateway:
+  #  ingress:
+  #    enabled: true
+  #    hosts:
+  #      - host: FIXME
+  #        paths:
+  #          - path: /
+  #            pathType: Prefix
+
+  # Tell loki to use the distributed deployment mode, this will enable the necessary components and disable the single binary mode
+  deploymentMode: Distributed
+
+  ingester:
+    replicas: 1
+    zoneAwareReplication:
+      enabled: false # Disable zone aware replication for loki, as it can add overhead and is often not needed in distributed mode, can be enabled if desired
+    nodeSelector:
+      karpenter.sh/capacity-type: on-demand # Ingesters are stateful and should run on stable on-demand instances
+    resources: {} # Need to change after get stable/idle resource usage, but start with something small to avoid OOMing
+  querier:
+    replicas: 2
+    maxUnavailable: 1
+    nodeSelector:
+      karpenter.sh/capacity-type: spot # Queriers are stateless and can run on cheaper spot instances, but ensure you have enough to handle the load and avoid OOMing
+    resources: {} # Need to change after get stable/idle resource usage, but start with something small to avoid OOMing
+  queryFrontend:
+    replicas: 1
+    maxUnavailable: 1
+    nodeSelector:
+      karpenter.sh/capacity-type: spot # Query frontends are stateless and can run on cheaper spot instances, but ensure you have enough to handle the load and avoid OOMing
+    resources: {} # Need to change after get stable/idle resource usage, but start with something small to avoid OOMing
+  queryScheduler:
+    replicas: 1
+    nodeSelector:
+      karpenter.sh/capacity-type: spot # Query schedulers are stateless and can run on cheaper spot instances, but ensure you have enough to handle the load and avoid OOMing
+    resources: {} # Need to change after get stable/idle resource usage, but start with something small to avoid OOMing
+  distributor:
+    replicas: 2
+    maxUnavailable: 1
+    nodeSelector:
+      karpenter.sh/capacity-type: spot # Distributors are stateless and can run on cheaper spot instances, but ensure you have enough to handle the load and avoid OOMing
+    resources: {} # Need to change after get stable/idle resource usage, but start with something small to avoid OOMing
+  compactor:
+    replicas: 1
+    nodeSelector:
+      karpenter.sh/capacity-type: on-demand # Compactors are stateful and should run on stable on-demand instances
+    resources: {} # Need to change after get stable/idle resource usage, but start with something small to avoid OOMing
+  indexGateway:
+    replicas: 1
+    maxUnavailable: 1
+    nodeSelector:
+      karpenter.sh/capacity-type: on-demand # Index gateways are stateful and should run on stable on-demand instances, but can be reduced to 1 for small setups
+    resources: {} # Need to change after get stable/idle resource usage, but start with something small to avoid OOMing
+
+  # Test Only Components - These are not required for a basic distributed setup, but can be enabled for testing or if you have specific use cases that require them
+  lokiCanary:
+    enabled: false # Disable loki canary by default, as it's often not needed in distributed mode and can add overhead, can be enabled if desired
+
+  chunksCache:
+    enabled: false # Disable chunks cache by default, as it's often not needed in distributed mode and can add overhead, can be enabled if desired
+  resultsCache:
+    enabled: false # Disable results cache by default, as it's often not needed in distributed mode and can add overhead, can be enabled if desired
+  memcache:
+    enabled: false # Disable memcached by default, as it's often not needed in distributed mode and can add overhead, can be enabled if desired
+
+  # optional experimental components
+  bloomPlanner:
+    replicas: 0
+  bloomBuilder:
+    replicas: 0
+  bloomGateway:
+    replicas: 0
+
+  # Zero out replica counts of other deployment modes
+  backend:
+    replicas: 0
+  read:
+    replicas: 0
+  write:
+    replicas: 0
+
+  singleBinary:
+    replicas: 0
