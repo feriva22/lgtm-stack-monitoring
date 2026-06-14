@@ -6,7 +6,9 @@ loki:
 
   # Disable for minio, as we will use it for mimir
   minio:
-    enabled: false
+    enabled: true #enabled first for testing, but should be disabled for production as we will use mimir's minio for object storage
+    nodeSelector:
+      karpenter.sh/capacity-type: on-demand # Ingesters are stateful and should run on stable on-demand instances
   
   #commonLabels:
   #  labelA: valueA
