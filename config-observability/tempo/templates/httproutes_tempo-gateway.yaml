@@ -1,19 +1,19 @@
-{{- if .Values.lokiGateway.enabled -}}
+{{- if .Values.tempoGateway.enabled -}}
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: {{ printf "%s-loki-gateway" .Release.Name | trunc 63 | trimSuffix "-" }}
+  name: {{ printf "%s-tempo-gateway" .Release.Name | trunc 63 | trimSuffix "-" }}
   namespace: {{ .Release.Namespace | default "observability" }}
 spec:
   parentRefs:
     - group: gateway.networking.k8s.io
       kind: Gateway
-      name: {{ .Values.lokiGateway.parentGatewayName | quote }}
-      namespace: {{ .Values.lokiGateway.parentGatewayNamespace | default .Release.Namespace | quote }}
+      name: {{ .Values.tempoGateway.parentGatewayName | quote }}
+      namespace: {{ .Values.tempoGateway.parentGatewayNamespace | default .Release.Namespace | quote }}
   # Only render hostnames if the list is provided and not empty
-  {{- if .Values.lokiGateway.hostnames }}
+  {{- if .Values.tempoGateway.hostnames }}
   hostnames:
-    {{- range .Values.lokiGateway.hostnames }}
+    {{- range .Values.tempoGateway.hostnames }}
     - {{ . | quote }}
     {{- end }}
   {{- end }}
@@ -22,9 +22,9 @@ spec:
         - path:
             type: PathPrefix
             # Defaults to / if no path is provided
-            value: {{ .Values.lokiGateway.path | default "/" | quote }}
+            value: {{ .Values.tempoGateway.path | default "/" | quote }}
       # Rewrite filter logic
-      {{- if and .Values.lokiGateway.path (ne .Values.lokiGateway.path "/") }}
+      {{- if and .Values.tempoGateway.path (ne .Values.tempoGateway.path "/") }}
       filters:
         - type: URLRewrite
           urlRewrite:
@@ -34,6 +34,6 @@ spec:
       {{- end }}
       
       backendRefs:
-        - name: loki-gateway
-          port: {{ .Values.lokiGateway.servicePort | default 80 }}
+        - name: tempo-gateway
+          port: {{ .Values.tempoGateway.servicePort | default 80 }}
 {{- end }}
