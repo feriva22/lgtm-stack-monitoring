@@ -45,6 +45,12 @@ loki:
   # Tell loki to use the distributed deployment mode, this will enable the necessary components and disable the single binary mode
   deploymentMode: Distributed
 
+  gateway:
+    enabled: true # Enable the gateway component, which is required for distributed mode and provides a single entry point for queries and ingestion, but can be disabled if you want to expose components directly or use a different ingress solution
+    nodeSelector:
+      karpenter.sh/capacity-type: spot # Queriers are stateless and can run on cheaper spot instances, but ensure you have enough to handle the load and avoid OOMing
+    resources: {} # Need to change after get stable/idle resource usage, but start with something small to avoid OOMing
+    
   ingester:
     replicas: 1
     zoneAwareReplication:
