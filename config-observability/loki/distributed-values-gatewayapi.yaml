@@ -41,7 +41,6 @@ loki:
           endpoint: s3.ap-southeast-3.amazonaws.com
           insecure: false
           region: ap-southeast-3
-          aws_sdk_auth: true # Use AWS SDK for S3 interactions, which can provide better performance and reliability, but requires proper AWS credentials setup, can be disabled if you want to use basic S3 interactions with access key and secret key
     commonConfig:
       replication_factor: 1 # Set replication factor to 1 for loki, as it's often not needed in distributed mode and can add overhead, but can be increased if desired for higher availability
     ingester:
