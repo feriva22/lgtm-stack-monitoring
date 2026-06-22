@@ -7,5 +7,6 @@ tempo:
     enabled: true
     size: 10Gi
     storageClassName: "gp3-automode-eks-dev"
-  multitenancyEnabled: true # Enable multitenancy with a X-Scope-OrgID Header
-  reportingEnabled: false #Disable reporting to Grafana Labs , prevent outgoing traffic
+  tempo:
+    multitenancyEnabled: true # Enable multitenancy with a X-Scope-OrgID Header
+    reportingEnabled: false #Disable reporting to Grafana Labs , prevent outgoing traffic
