@@ -7,3 +7,4 @@ tempo:
     enabled: true
     size: 10Gi
     storageClassName: "gp3-automode-eks-dev"
+  multitenancyEnabled: true # Enable multitenancy with a X-Scope-OrgID Header
