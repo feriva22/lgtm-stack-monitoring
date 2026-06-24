@@ -14,7 +14,7 @@ tempo:
     metricsGenerator:
       # -- If true, enables Tempo's metrics generator (https://grafana.com/docs/tempo/next/metrics-generator/)
       enabled: true
-      remoteWriteUrl: "http://mimir-gateway.observability:80/api/v1/write" # We override the tenant setting in overrides
+      remoteWriteUrl: "http://mimir-gateway.observability:80/api/v1/push" # We override the tenant setting in overrides
       processor:
         service_graphs:
           wait: 10s
