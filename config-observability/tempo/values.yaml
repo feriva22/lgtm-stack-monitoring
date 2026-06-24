@@ -19,8 +19,25 @@ tempo:
         service_graphs:
           wait: 10s
           max_items: 10000
+          # Additional dimensions to include in service graph metrics
+          dimensions:
+            - http.method
+            - http.status_code
         span_metrics:
+          # Generate the traces_target_info metric (joins span metrics with resource attributes)
           enable_target_info: true
+          # Dimensions to include in span metrics
+          dimensions:
+            - service.name
+            - span.name
+            - span.kind
+            - status.code
+          # Intrinsic dimensions are always included
+          intrinsic_dimensions:
+            service: true
+            span_name: true
+            span_kind: true
+            status_code: true
 
     overrides:
       defaults:
