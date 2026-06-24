@@ -13,7 +13,7 @@ tempo:
 
     metricsGenerator:
       # -- If true, enables Tempo's metrics generator (https://grafana.com/docs/tempo/next/metrics-generator/)
-      enabled: true
+      enabled: false
       remoteWriteUrl: "http://mimir-gateway.observability:80/api/v1/push" # We override the tenant setting in overrides
       processor:
         service_graphs:
@@ -22,11 +22,11 @@ tempo:
         span_metrics:
           enable_target_info: true
 
-    per_tenant_overrides: 
-      'PT-Pos-Indonesia-Kurir-Dev':
-        metrics_generator:
-          remote_write_headers:
-            X-Scope-OrgID: PT-Pos-Indonesia-Kurir-Dev
-          processors:
-            - service-graphs
-            - span-metrics
+    # per_tenant_overrides: 
+    #   'PT-Pos-Indonesia-Kurir-Dev':
+    #     metrics_generator:
+    #       remote_write_headers:
+    #         X-Scope-OrgID: PT-Pos-Indonesia-Kurir-Dev
+    #       processors:
+    #         - service-graphs
+    #         - span-metrics
