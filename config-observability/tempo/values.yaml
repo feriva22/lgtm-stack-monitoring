@@ -32,6 +32,10 @@ tempo:
             - span.name
             - span.kind
             - status.code
+            # ─── ADD THIS BLOCK TO EXPOSE HTTP ROUTE & METHOD ───
+            - http.method
+            - http.route
+            - http.status_code
           # Intrinsic dimensions are always included
           intrinsic_dimensions:
             service: true
