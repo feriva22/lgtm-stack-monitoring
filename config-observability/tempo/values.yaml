@@ -44,6 +44,7 @@ tempo:
         metrics_generator:
           processors:
             - span-metrics
+            - service-graphs
 
     # per_tenant_overrides: 
     #   'PT-Pos-Indonesia-Kurir-Dev':
