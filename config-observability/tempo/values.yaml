@@ -10,3 +10,21 @@ tempo:
   tempo:
     multitenancyEnabled: true # Enable multitenancy with a X-Scope-OrgID Header
     reportingEnabled: false #Disable reporting to Grafana Labs , prevent outgoing traffic
+
+    metricsGenerator:
+      # -- If true, enables Tempo's metrics generator (https://grafana.com/docs/tempo/next/metrics-generator/)
+      enabled: true
+      remoteWriteUrl: "http://mimir-gateway.observability:80/api/v1/write" # We override the tenant setting in overrides
+      processor:
+        service_graphs:
+          wait: 10s
+          max_items: 10000
+        span_metrics:
+          enable_target_info: true
+
+    per_tenant_overrides: 
+      'PT-Pos-Indonesia-Kurir-Dev':
+        metrics_generator:
+          processors:
+            - service-graphs
+            - span-metrics
