@@ -22,6 +22,12 @@ tempo:
         span_metrics:
           enable_target_info: true
 
+    overrides:
+      defaults:
+        metrics_generator:
+          processors:
+            - span-metrics
+
     # per_tenant_overrides: 
     #   'PT-Pos-Indonesia-Kurir-Dev':
     #     metrics_generator:
