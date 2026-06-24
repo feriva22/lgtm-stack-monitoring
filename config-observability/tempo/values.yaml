@@ -25,6 +25,8 @@ tempo:
     per_tenant_overrides: 
       'PT-Pos-Indonesia-Kurir-Dev':
         metrics_generator:
+          remote_write_headers:
+            X-Scope-OrgID: PT-Pos-Indonesia-Kurir-Dev
           processors:
             - service-graphs
             - span-metrics
