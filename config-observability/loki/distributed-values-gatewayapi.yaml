@@ -36,6 +36,8 @@ loki:
   loki:
     limits_config:
       allow_structured_metadata: true # Enable structured metadata, for ingested otel data log
+      retention_period: 7d # Global default retention period for all tenants
+      # Per-tenant retention can be overridden via the Loki runtime config or per-tenant overrides
     schemaConfig:
       configs:
         - from: 2024-04-01
@@ -56,6 +58,14 @@ loki:
           endpoint: s3.ap-southeast-3.amazonaws.com
           insecure: false
           region: ap-southeast-3
+    compactor:
+      working_directory: /var/loki/compactor
+      compaction_interval: 10m
+      retention_enabled: true        # Must be true to enable retention/deletion
+      retention_delete_delay: 2h     # Delay before actually deleting chunks after retention period
+      retention_delete_worker_count: 150
+      delete_request_store: s3
+
     commonConfig:
       replication_factor: 1 # Set replication factor to 1 for loki, as it's often not needed in distributed mode and can add overhead, but can be increased if desired for higher availability
     ingester:
@@ -65,6 +75,14 @@ loki:
     querier:
       # Default is 4, if you have enough memory and CPU you can increase, reduce if OOMing
       max_concurrent: 4
+
+    # Runtime config for per-tenant overrides
+    # This allows you to set per-tenant limits without redeploying Loki
+    # The runtime config is reloaded periodically (default: 10s)
+    runtimeConfig:
+      overrides:
+        PT-Pos-Indonesia-Kurir-Dev:
+          retention_period: 3d # Max 3 days retention for this tenant
 
   # Config for Gateway API to expose loki to outside cluster
   gateway:
