@@ -31,6 +31,10 @@ spec:
       hostPID: true
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
+      {{- with .Values.ebpfAgent.hostAliases }}
+      hostAliases:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       nodeSelector:
         {{- toYaml .Values.ebpfAgent.nodeSelector | nindent 8 }}
       tolerations:

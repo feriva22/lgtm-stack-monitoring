@@ -1,5 +1,6 @@
 pyroscope:
   pyroscope:
+    # This is fix issue https://github.com/grafana/pyroscope/issues/2753
     extraEnvVars:
       MY_POD_IP:
         valueFrom:

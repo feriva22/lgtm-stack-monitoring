@@ -1,0 +1,29 @@
+pyroscope:
+  enabled: false
+
+# ------------------------------------------------------------
+# eBPF Profiling Agent (DaemonSet)
+# ------------------------------------------------------------
+ebpfAgent:
+  enabled: true
+  image:
+    registry: ""
+    repository: grafana/pyroscope
+    tag: "2.1.1"
+    pullPolicy: IfNotPresent
+  serverAddress: "http://observability.posindonesia.co.id:4040"
+  sampleRate: 99
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+  nodeSelector: {}
+  tolerations:
+    - operator: Exists
+  extraArgs: []
+  hostAliases:
+    - ip: "192.169.220.39"
+      hostnames:
+        - "observability.posindonesia.co.id"
