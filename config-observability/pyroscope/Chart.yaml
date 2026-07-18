@@ -1,0 +1,11 @@
+apiVersion: v2
+name: pyroscope-lgtm-stack
+description: A wrapper chart for Pyroscope server and eBPF agent
+type: application
+version: 1.0.0
+appVersion: "2.1.1"
+
+dependencies:
+  - name: pyroscope
+    version: "2.1.1"
+    repository: "https://grafana.github.io/helm-charts"

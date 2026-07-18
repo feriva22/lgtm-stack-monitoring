@@ -1,0 +1,68 @@
+pyroscope:
+  replicaCount: 1
+  disableSelfProfile: true
+  fullnameOverride: "pyroscope"
+
+  extraArgs:
+    log.level: debug
+
+  rbac:
+    create: true
+
+  serviceAccount:
+    create: true
+
+  service:
+    type: ClusterIP
+    port: 4040
+    port_name: http2
+    scheme: HTTP
+
+  persistence:
+    enabled: true
+    size: 10Gi
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  structuredConfig:
+    multitenancy_enabled: true
+    storage:
+      backend: filesystem
+
+minio:
+  enabled: false
+
+alloy:
+  enabled: false
+
+ingress:
+  enabled: false
+
+httpRoute:
+  enabled: false
+
+# ------------------------------------------------------------
+# eBPF Profiling Agent (DaemonSet)
+# ------------------------------------------------------------
+ebpfAgent:
+  enabled: true
+  image:
+    registry: ""
+    repository: grafana/pyroscope
+    tag: "2.1.1"
+    pullPolicy: IfNotPresent
+  serverAddress: "http://pyroscope.observability:4040"
+  sampleRate: 99
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+  nodeSelector: {}
+  tolerations:
+    - operator: Exists
+  extraArgs: []
