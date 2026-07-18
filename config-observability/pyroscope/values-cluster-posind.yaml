@@ -5,6 +5,13 @@ pyroscope:
 
   extraArgs:
     log.level: debug
+    memberlist.advertise-addr: $(POD_IP)
+
+  extraEnvVars:
+    POD_IP:
+      valueFrom:
+        fieldRef:
+          fieldPath: status.podIP
 
   rbac:
     create: true
