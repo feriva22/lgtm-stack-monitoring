@@ -1,0 +1,19 @@
+pyroscope:
+  replicaCount: 1
+
+  nodeSelector:
+    karpenter.sh/capacity-type: on-demand
+
+  alloy:
+    enabled: false
+
+  resources:
+    requests:
+      cpu: 200m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+ebpfAgent:
+  enabled: false
