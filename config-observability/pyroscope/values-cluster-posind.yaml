@@ -42,6 +42,9 @@ pyroscope:
         secret_access_key: supersecret
         insecure: true
 
+  alloy:
+    enabled: false
+
 minio:
   enabled: true
   replicas: 1
@@ -61,9 +64,6 @@ minio:
       memory: 128Mi
   nodeSelector:
     karpenter.sh/capacity-type: on-demand
-
-alloy:
-  enabled: false
 
 ingress:
   enabled: false
