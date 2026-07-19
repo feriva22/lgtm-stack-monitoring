@@ -50,7 +50,11 @@ tempo:
             - local-blocks
             - span-metrics
             - service-graphs
-
+    
+    # Query Frontend for MCP server enabled true
+    queryFrontend:
+      mcp_server:
+        enabled: true
     # per_tenant_overrides: 
     #   'PT-Pos-Indonesia-Kurir-Dev':
     #     metrics_generator:
