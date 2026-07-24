@@ -83,6 +83,8 @@ loki:
       overrides:
         PT-Pos-Indonesia-Kurir-Dev:
           retention_period: 3d # Max 3 days retention for this tenant
+        PT-Pos-Indonesia-Jaskug-Prod:
+          retention_period: 14d # Max 14 days retention for this tenant
 
   # Config for Gateway API to expose loki to outside cluster
   gateway:
