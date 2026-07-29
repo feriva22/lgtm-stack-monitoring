@@ -31,8 +31,8 @@ mimir-distributed:
   mimir:
     runtimeConfig:
       overrides:
-        "ACK-Cluster-Glid-Prod":
-          max_label_names_per_series: 40
+        ACK-Cluster-Glid-Prod:
+          max_label_names_per_series: 50
     structuredConfig:
       # This is the only required setting, it tells Mimir to use the gossip protocol for cluster membership and replication
       memberlist:
@@ -85,6 +85,7 @@ mimir-distributed:
         # Maximum number of rule groups per-tenant. 0 to disable.
         ruler_max_rule_groups_per_tenant: 0  
         max_global_series_per_user: 0 # 0 means no limit, set to a reasonable number if you want to prevent a single tenant from consuming all resources
+        max_label_names_per_series: 40
 
   kafka:
     enabled: true
