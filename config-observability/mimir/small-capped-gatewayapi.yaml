@@ -29,6 +29,10 @@ mimir-distributed:
             fieldPath: status.podIP
   # Global Config: Reduce replication to save 33% of resources
   mimir:
+    runtimeConfig:
+      overrides:
+        "ACK-Cluster-Glid-Prod":
+          max_label_names_per_series: 40
     structuredConfig:
       # This is the only required setting, it tells Mimir to use the gossip protocol for cluster membership and replication
       memberlist:
