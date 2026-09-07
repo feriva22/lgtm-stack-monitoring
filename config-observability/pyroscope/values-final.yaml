@@ -8,7 +8,7 @@ pyroscope:
             fieldPath: status.podIP
     extraArgs:
       memberlist.bind-addr: $(MY_POD_IP)
-      multitenancy_enabled: true
+      auth.multitenancy_enabled: true
 
   replicaCount: 1
 
