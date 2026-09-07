@@ -19,9 +19,28 @@ kube-prometheus-stack:
   kubeStateMetrics:
     enabled: true
 
+  # What we need disabled for Control Plane monitoring
+  kubeApiServer:
+    enabled: false
+  kubeControllerManager:
+    enabled: false
+  coreDns:
+    enabled: false
+  kubeEtcd:
+    enabled: false
+  kubeScheduler:
+    enabled: false
+
   # Keep the Default ServiceMonitors so Alloy can find them
   # This is where the labeling logic lives!
   defaultRules:
     create: true  # This creates the PrometheusRules (alerts)
+    kubeApiserverAvailability: false
+    kubeApiserverBurnrate: false
+    kubeApiserverHistogram: false
+    kubeApiserverSlos: false
+    kubeControllerManager: false
+    kubeSchedulerAlerting: false
+    kubeSchedulerRecording: false
   kubernetesServiceMonitors:
     enabled: true # This creates the ServiceMonitors for Kubelet, etc.
