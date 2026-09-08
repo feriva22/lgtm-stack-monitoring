@@ -75,36 +75,3 @@ alloy:
             tenant_id = "PT-Pos-Indonesia-Jaskug-Prod"
           }
         }
-
-        // 2. Discover PodLogs custom resources and scrape Kubernetes pod logs
-        loki.source.podlogs "kubernetes_pods" {
-          // Forward scraped logs directly to the loki.write component defined above
-          forward_to = [loki.write.datacenter_logs.receiver]
-
-          // Only discover PodLogs CRDs located in these namespaces
-          namespace_selector {
-            match_expression {
-              key      = "kubernetes.io/metadata.name"
-              operator = "In"
-              values   = ["cgsclient-prod", "switching-prod"]
-            }
-          } 
-
-          // Optional: Read only new logs upon pod discovery to prevent fetching historical buffers
-          tail_from_end = true
-
-          // Optional: Preserve Kubernetes pod labels for downstream filtering/relabeling
-          preserve_discovered_labels = true
-
-          // When Alloy runs as a DaemonSet, filter discovery to the local node only
-          node_filter {
-            enabled   = true
-            node_name = sys.env("NODE_NAME")
-          }
-
-          // Uses in-cluster RBAC permissions by default. 
-          // Custom API server configuration can be supplied here if running out-of-cluster:
-          // client {
-          //   kubeconfig_file = "/path/to/kubeconfig"
-          // }
-        }
