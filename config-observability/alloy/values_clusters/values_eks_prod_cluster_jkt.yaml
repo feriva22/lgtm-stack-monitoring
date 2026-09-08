@@ -99,10 +99,10 @@ alloy:
           preserve_discovered_labels = true
 
           // When Alloy runs as a DaemonSet, filter discovery to the local node only
-          node_filter {
-            enabled   = true
-            node_name = sys.env("NODE_NAME")
-          }
+          // node_filter {
+          //   enabled   = true
+          //   node_name = sys.env("NODE_NAME")
+          // }
 
           // Uses in-cluster RBAC permissions by default. 
           // Custom API server configuration can be supplied here if running out-of-cluster:
