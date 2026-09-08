@@ -72,7 +72,7 @@ alloy:
           endpoint {
             url = "http://observability.posindonesia.co.id/logging/api/v1/push"
             headers = {
-              "X-Scope-OrgID" = "PT-Pos-Indonesia-Cluster-Production-Jakarta", 
+              "X-Scope-OrgID" = "PT-Pos-Indonesia-Jaskug-Prod", 
             }
             
           }
