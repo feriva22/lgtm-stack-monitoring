@@ -71,10 +71,8 @@ alloy:
         loki.write "datacenter_logs" {
           endpoint {
             url = "http://observability.posindonesia.co.id/logging/loki/api/v1/push"
-            headers = {
-              "X-Scope-OrgID" = "PT-Pos-Indonesia-Jaskug-Prod", 
-            }
-            
+
+            tenant_id = "PT-Pos-Indonesia-Jaskug-Prod"
           }
         }
 
