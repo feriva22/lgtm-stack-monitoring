@@ -1,0 +1,103 @@
+alloy:
+  controller:
+    # -- Type of controller to use for deploying Grafana Alloy in the cluster.
+    # Must be one of 'daemonset', 'deployment', or 'statefulset'.
+    type: 'statefulset'
+    rbac:
+      create: true # This allows Alloy to read ServiceMonitors
+  alloy:
+    clustering:
+      enabled: false
+    configMap:
+      content: |-
+        logging {
+          level  = "info"
+          format = "logfmt"
+        }
+
+        // Enable livedebugging for troubleshooting
+        livedebugging {
+          enabled = false
+        }
+
+        // Add ruler integration
+        mimir.rules.kubernetes "local" {
+          address = "http://metrics.posindonesia.deploy-at.my.id"
+          tenant_id = "PT-Pos-Indonesia-Cluster-Production-Jakarta"
+        }
+
+        // 1. Discover and scrape all ServiceMonitors (Node Exporter, KSM, etc.)
+        prometheus.operator.servicemonitors "kube_stack" {
+          forward_to = [prometheus.remote_write.mimir.receiver]
+        }
+
+        // 2. Discover and scrape all PodMonitors (if you have any)
+        prometheus.operator.podmonitors "kube_stack" {
+          forward_to = [prometheus.remote_write.mimir.receiver]
+        }
+
+
+        // 3. Define the Remote Write destination (Mimir)
+        prometheus.remote_write "mimir" {
+          endpoint {
+            // This points to the Mimir Gateway service
+            url = "http://metrics.posindonesia.deploy-at.my.id/api/v1/push"
+
+            // If your Mimir has multi-tenancy enabled (default in some charts), 
+            // you MUST provide a Tenant ID header.
+            headers = {
+              "X-Scope-OrgID" = "PT-Pos-Indonesia-Cluster-Production-Jakarta", 
+            }
+            
+            // If you set up Basic Auth for Mimir, add this:
+            /*
+            basic_auth {
+              username = "your-user"
+              password = "your-password"
+            }
+            */
+          }
+
+          // Optional: Global labels added to EVERY metric
+          external_labels = {
+            "cluster" = "EKS-Prod-Cluster-JKT",
+            "cloud"   = "aws",
+            "environment" = "production",
+            "region" = "ap-southeast-3",
+          }
+        }
+
+        // Logging section
+        loki.write "datacenter_logs" {
+          endpoint {
+            url = "http://observability.posindonesia.co.id/logging/api/v1/push"
+            headers = {
+              "X-Scope-OrgID" = "PT-Pos-Indonesia-Cluster-Production-Jakarta", 
+            }
+            
+          }
+        }
+
+        // 2. Discover PodLogs custom resources and scrape Kubernetes pod logs
+        loki.source.podlogs "kubernetes_pods" {
+          // Forward scraped logs directly to the loki.write component defined above
+          forward_to = [loki.write.datacenter_logs.receiver]
+
+          // Optional: Read only new logs upon pod discovery to prevent fetching historical buffers
+          tail_from_end = true
+
+          // Optional: Preserve Kubernetes pod labels for downstream filtering/relabeling
+          preserve_discovered_labels = true
+
+          // When Alloy runs as a DaemonSet, filter discovery to the local node only
+          node_filter {
+            enabled   = true
+            node_name = sys.env("NODE_NAME")
+          }
+
+          // Uses in-cluster RBAC permissions by default. 
+          // Custom API server configuration can be supplied here if running out-of-cluster:
+          // client {
+          //   kubeconfig_file = "/path/to/kubeconfig"
+          // }
+        }
